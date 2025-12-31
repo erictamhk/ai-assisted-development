@@ -9,6 +9,7 @@ Testing is a critical discipline in software development that ensures code corre
 | [Test Pyramids](test-pyramids.md) | Testing strategy overview with unit/integration/E2E layers | Core foundation for all testing |
 | [TDD Workflow](tdd-workflow.md) | Red-Green-Refactor methodology with advanced patterns | Complete TDD implementation guide |
 | [BDD with Gherkin](bdd-gherkin.md) | Behavior-driven development using Gherkin syntax | Living documentation approach |
+| [testing-conventions.md](testing-conventions.md) | Comprehensive testing conventions and patterns | Complete testing reference guide |
 
 ## Quick Reference
 

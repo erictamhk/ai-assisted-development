@@ -6,7 +6,13 @@ This folder contains comprehensive knowledge about coding style, conventions, an
 
 ### Core Principles
 
-- **[clean-code.md](clean-code.md)**: Writing maintainable, expressive code with SOLID principles, error handling, and AI coding anti-patterns
+- **[clean-code.md](clean-code.md)**: Writing maintainable, expressive code with AI coding anti-patterns
+- **[solid-principles.md](solid-principles.md)**: Comprehensive SOLID principles guide with TypeScript examples covering SRP, OCP, LSP, ISP, and DIP
+
+### Conventions
+
+- **[naming-conventions.md](naming-conventions.md)**: Detailed naming conventions for entities, value objects, use cases, services, controllers, DTOs, and more
+- **[solid-principles.md](solid-principles.md)**: SOLID principles reference with practical examples
 
 ### Conventions
 
