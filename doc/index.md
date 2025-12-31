@@ -10,17 +10,14 @@ A comprehensive documentation of modern software engineering concepts, methodolo
 - [Problem Frames Approach](problem-frames-approach.md) - Michael Jackson's framework for requirements analysis
 
 ### Domain-Driven Design
-- [Domain-Driven Design](domain-driven-design.md) - Strategic and tactical DDD patterns
-- [DDD Patterns](ddd-patterns.md) - Entity, Value Object, Aggregate, Repository patterns
+- [Domain-Driven Design](domain-driven-design-megred.md) - Strategic and tactical DDD patterns
 - [Domain Event Storming](domain-event-storming.md) - Collaborative event modeling technique
 - [Domain Event Storytelling](domain-event-storytelling.md) - Narrative approach to domain events
 
 ### Architecture & Code Quality
-- [Clean Architecture](clean-architecture.md) - Robert C. Martin's architectural principles
+- [Layered Architecture](layered-architecture.md) - Ports and Adapters / Clean Architecture principles
 - [Clean Code](clean-code.md) - Writing maintainable and expressive code
-- [Vertical Slice Architecture](vertical-slice-architecture.md) - Feature-based project organization
-- [Hexagonal Architecture](hexagonal-architecture.md) - Ports and Adapters pattern
-- [Vertical Slice Architecture Detailed](vertical-slice-architecture-detailed.md) - Complete guide with code placement
+- [Vertical Slice Architecture](vertical-slice-architecture-megred.md) - Feature-based project organization
 
 ### Specification & Testing
 - [Specification by Example](specification-by-example.md) - Requirements through concrete examples
@@ -51,12 +48,6 @@ A comprehensive documentation of modern software engineering concepts, methodolo
 - [AI Agent Limitations](ai-agent-limitations.md) - Why agents skip instructions and fundamental constraints
 - [On-Demand Rule Loading](on-demand-rule-loading.md) - Techniques to load rules only when needed
 
-### Reference Knowledge (from Refactoring Project)
-- [Hexagonal Architecture](hexagonal-architecture.md) - Ports and Adapters in-depth
-- [Vertical Slice Architecture Detailed](vertical-slice-architecture-detailed.md) - Feature-based structure guide
-- [DDD Patterns](ddd-patterns.md) - Entity, Value Object, Aggregate patterns
-- [Coding Conventions](coding-conventions.md) - Universal coding standards
-
 ## Quick Links
 
 ### For AI Coding Assistants
@@ -69,7 +60,7 @@ All documentation is optimized for AI-assisted development, including:
 
 ### How to Use This Documentation
 1. **New Projects**: Start with Requirements and Specification, then explore Architecture patterns
-2. **Refactoring**: Reference Clean Architecture and Clean Code for guidance
+2. **Refactoring**: Reference Layered Architecture and Clean Code for guidance
 3. **Team Collaboration**: Use Impact Mapping and Example Mapping for planning
 4. **Quality Assurance**: Implement TDD, BDD, and Executable Specifications
 5. **AI-Assisted Development**: Use AGENTS.md and Prompt Engineering for effective agent collaboration
@@ -78,7 +69,7 @@ All documentation is optimized for AI-assisted development, including:
 When working with AI agents:
 1. Read relevant AGENTS.md files before coding
 2. Reference pattern documents for implementation guidance
-3. Use the DDD Patterns document for domain modeling
+3. Use the Domain-Driven Design document for domain modeling
 4. Follow Coding Conventions for consistent code
 5. Use On-Demand Rule Loading to manage complex rule sets
 
@@ -87,7 +78,7 @@ When working with AI agents:
 | Category | Topics Covered | Best For |
 |----------|---------------|----------|
 | **Requirements** | Problem Frames, Spec-by-Example | Understanding what to build |
-| **Architecture** | Clean Architecture, Hexagonal, Vertical Slices | Structuring the system |
+| **Architecture** | Layered Architecture, Vertical Slices | Structuring the system |
 | **DDD** | Strategic/Tactical Patterns, Entity/VO/Aggregate | Complex domain modeling |
 | **Testing** | TDD, BDD, Executable Specs | Quality assurance |
 | **Patterns** | Design Patterns, Pattern Languages | Reusable solutions |
@@ -116,4 +107,3 @@ When adding new documentation files:
 - Verify code examples compile and work correctly
 - Keep references and links current
 - Incorporate feedback from AI-assisted development usage
-
