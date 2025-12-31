@@ -9,6 +9,62 @@ This folder contains reference documentation including guidelines, constitutions
 - **FOLDER_STRUCTURE.md** - Documentation of the repository folder structure
 - **ai-coding-exercise-analysis.md** - Analysis of the AI Coding Exercise template repository for AI-assisted DDD development
 
+### opencode
+
+An open-source AI coding agent with provider-agnostic architecture, built-in LSP support, and TUI-focused design.
+
+**Location**: `ref/opencode/`
+
+**Key Features**:
+- Provider-agnostic architecture (Claude, OpenAI, Google, local models)
+- Built-in LSP support for multiple languages
+- TUI-first design (terminal user interface)
+- Client/server architecture for remote control
+- Agent system with build, plan, and subagent modes
+- MCP (Model Context Protocol) integration
+- Skills system for extending agent capabilities
+
+**Agent Modes**:
+- **build** - Default agent with full access for development work
+- **plan** - Read-only agent for analysis and exploration
+- **subagent** - General-purpose agent for complex multi-step tasks (@general)
+
+**Content Engineering**:
+- Skills system (`SKILL.md`) for defining reusable agent capabilities
+- Agent prompts stored as text files with context-aware templates
+- Prompt compaction, exploration, summary, and title generation
+- System prompt header for provider-specific instructions
+- Agent generation API for dynamic agent configuration
+
+**Documentation Structure**:
+- `.opencode/` - Configuration directory
+  - `agent/` - Agent prompts and definitions
+  - `command/` - Custom commands
+  - `skill/` - Skills for extending agent behavior
+  - `opencode.jsonc` - Main configuration file
+- `packages/opencode/src/agent/` - Core agent implementation
+- `packages/docs/` - User-facing documentation
+- `packages/sdk/` - JavaScript SDK for external integrations
+
+**Quick Start**:
+```bash
+# Run against current directory
+bun dev
+
+# Run against specific directory
+bun dev <directory>
+
+# Build standalone executable
+./packages/opencode/script/build.ts --single
+```
+
+See `ref/opencode-analysis.md` for detailed analysis including:
+- Content Engineering patterns
+- Agent system architecture
+- Tool calling and parallel execution
+- SDK and plugin architecture
+- MCP integration patterns
+
 ## Referenced Repositories
 
 ### ai-coding-exercise
