@@ -431,6 +431,212 @@ Constraints:
 | Dependency Inversion Violation | Domain depending on frameworks | Use dependency injection |
 | Feature Scattered Across Layers | Related code in multiple layers | Organize by feature |
 | God Interface | One port for everything | Separate inbound/outbound ports |
+| Skipping Layers | Controllers directly calling repositories | Always go through use cases |
+| Leaking Infrastructure | Domain entities with framework annotations | Keep domain pure |
+| Concrete Dependencies | Use cases depending on concrete implementations | Depend on abstractions |
+| Missing Ports | Direct imports of infrastructure in core | Define ports, implement in adapters |
+
+---
+
+## Clean Architecture for AI-Assisted Development
+
+### AI Coding Guidelines
+
+When AI generates code following Clean Architecture:
+
+```typescript
+// 1. Always define ports (interfaces) in inner layers
+// Domain/Application layer defines the abstraction
+interface OrderRepository {
+  findById(id: OrderId): Promise<Order | null>;
+  save(order: Order): Promise<void>;
+}
+
+// 2. Outer layers implement the ports
+// Adapter layer implements the abstraction
+class PostgresOrderRepository implements OrderRepository {
+  constructor(private readonly db: Database) {}
+  
+  async findById(id: OrderId): Promise<Order | null> {
+    const row = await this.db.query('SELECT * FROM orders WHERE id = ?', [id.value]);
+    return row ? OrderMapper.toDomain(row) : null;
+  }
+  
+  async save(order: Order): Promise<void> {
+    await this.db.query('INSERT INTO orders...', [OrderMapper.toPersistence(order)]);
+  }
+}
+
+// 3. Domain layer has ZERO dependencies on outer layers
+// Domain entities are pure TypeScript/JavaScript
+class Order {
+  private constructor(
+    private readonly id: OrderId,
+    private status: OrderStatus,
+    private readonly lineItems: OrderLineItem[]
+  ) {}
+
+  static create(id: OrderId, lineItems: OrderLineItem[]): Order {
+    if (lineItems.length === 0) {
+      throw new DomainError('Order must have at least one line item');
+    }
+    return new Order(id, OrderStatus.DRAFT, lineItems);
+  }
+
+  submit(): void {
+    if (this.status !== OrderStatus.DRAFT) {
+      throw new DomainError('Order cannot be submitted');
+    }
+    this.status = OrderStatus.SUBMITTED;
+  }
+}
+
+// 4. Use case layer orchestrates domain objects through ports
+class CreateOrderHandler {
+  constructor(
+    private readonly orderRepository: OrderRepository,  // Interface
+    private readonly inventoryService: InventoryService // Interface
+  ) {}
+
+  async execute(input: CreateOrderInput): Promise<CreateOrderOutput> {
+    // Validate input
+    this.validateInput(input);
+
+    // Check inventory
+    await this.inventoryService.checkAvailability(input.items);
+
+    // Create domain object
+    const order = Order.create(
+      OrderId.generate(),
+      input.items.map(item => OrderLineItem.create(item.productId, item.quantity))
+    );
+
+    // Persist through port
+    await this.orderRepository.save(order);
+
+    return { orderId: order.id.value, status: order.status.value };
+  }
+
+  private validateInput(input: CreateOrderInput): void {
+    if (!input.customerId) throw new DomainError('Customer ID required');
+    if (!input.items?.length) throw new DomainError('Items required');
+  }
+}
+```
+
+### Decision Flowchart for AI
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    ARCHITECTURE DECISION TREE                   │
+└─────────────────────────────────────────────────────────────────┘
+
+Is this a new feature?
+│
+├─► NO → Modify existing code in same layer
+│
+└─► YES → Is this a small, simple feature?
+         │
+         ├─► YES → Consider layer-based structure
+         │
+         └─► NO → Use vertical slice structure
+
+What type of code is this?
+│
+├─► Domain logic (business rules)
+│   └─► Put in feature/domain/ or domain/ layer
+│
+├─► Business operation orchestration
+│   └─► Put in feature/usecase/ or application/ layer
+│
+├─► External system integration
+│   └─► Put in feature/adapter/ or adapters/ layer
+│
+└─► Framework/setup code
+    └─► Put in shared/io/ or frameworks/ layer
+
+Does this depend on external systems?
+│
+├─► YES → Define port (interface) in inner layer
+│        Implement in outer layer (adapter)
+│
+└─► NO → Can be in domain layer (pure business logic)
+
+Is this state-modifying?
+│
+├─► YES → Use Command pattern (CreateXxxHandler)
+│
+└─► NO → Use Query pattern (GetXxxHandler or XxxQuery)
+
+Does this span multiple features?
+│
+├─► YES → Coordinate through aggregate root
+│        Define shared port in shared/ if needed
+│
+└─► NO → Keep within feature slice
+```
+
+### Common AI Mistakes to Avoid
+
+```typescript
+// ❌ WRONG - Domain depends on framework
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity()
+export class Order {
+  @PrimaryGeneratedColumn()
+  id: number;
+  
+  @Column()
+  status: string;
+}
+
+// ✅ CORRECT - Pure domain entity
+export class Order {
+  private constructor(
+    private readonly id: OrderId,
+    private status: OrderStatus
+  ) {}
+
+  static create(id: OrderId, status: OrderStatus): Order {
+    return new Order(id, status);
+  }
+}
+
+// ❌ WRONG - Controller skips use case layer
+class OrderController {
+  constructor(private readonly orderRepository: OrderRepository) {}
+
+  async createOrder(req: Request): Promise<Response> {
+    // Bypasses use case - direct repository call
+    const order = new Order(OrderId.generate(), OrderStatus.DRAFT);
+    await this.orderRepository.save(order);
+    return Response.created(order.id.value);
+  }
+}
+
+// ✅ CORRECT - Controller delegates to use case
+class OrderController {
+  constructor(private readonly createOrderHandler: CreateOrderHandler) {}
+
+  async createOrder(req: Request): Promise<Response> {
+    const result = await this.createOrderHandler.execute(req.body);
+    return Response.created(result.orderId);
+  }
+}
+
+// ❌ WRONG - Use case depends on concrete implementation
+class CreateOrderHandler {
+  constructor(private readonly repo: TypeORMOrderRepository) {}
+}
+
+// ✅ CORRECT - Use case depends on abstraction
+class CreateOrderHandler {
+  constructor(private readonly repo: OrderRepository) {}
+}
+```
+
+---
 
 ## References
 

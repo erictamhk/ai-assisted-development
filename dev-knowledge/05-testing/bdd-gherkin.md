@@ -721,6 +721,173 @@ Ask AI to generate human-readable documentation from Gherkin scenarios for stake
 
 ---
 
+## Living Documentation
+
+### Concept
+BDD scenarios serve as both tests and documentation. This "living documentation" stays in sync with the codebase and provides up-to-date specifications.
+
+### Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| Single source of truth | Scenarios define expected behavior |
+| Always current | Tests prove documentation is accurate |
+| Stakeholder accessible | Non-technical users can read scenarios |
+| Automated regression | Scenarios catch regressions automatically |
+
+### Maintaining Living Documentation
+
+```gherkin
+Feature: Order Processing
+  As a customer
+  I want to place orders
+  So that I can purchase products
+
+  # This scenario is both a test AND documentation
+  Scenario: Customer places a valid order
+    Given the product "Laptop" is in stock
+    When I place an order for 1 "Laptop"
+    Then the order status should be "confirmed"
+    And I should receive an order confirmation email
+
+  # Document business rules explicitly
+  Rule: Orders cannot exceed available stock
+    Scenario: Order exceeds available stock
+      Given "Laptop" has 5 units in stock
+      When I place an order for 10 "Laptop" units
+      Then the order should be rejected
+      And I should see an "insufficient stock" message
+```
+
+---
+
+## Example Mapping with BDD
+
+### Process
+Example Mapping is a collaborative technique for discovering examples that become BDD scenarios.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    EXAMPLE MAPPING SESSION                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          │
+│  │   RULE      │  │  EXAMPLE    │  │  QUESTION   │          │
+│  │             │  │             │  │             │          │
+│  │ Business    │  │ Concrete    │  │ Needs       │          │
+│  │ rule or     │  │ instance    │  │ clarification│         │
+│  │ constraint  │  │ of the rule │  │             │          │
+│  └─────────────┘  └─────────────┘  └─────────────┘          │
+│       │                │                 │                   │
+│       ▼                ▼                 ▼                   │
+│  ┌─────────────────────────────────────────────┐            │
+│  │            USER STORY                        │            │
+│  │  "As a customer, I want to track orders     │            │
+│  │   so that I can know when they'll arrive"   │            │
+│  └─────────────────────────────────────────────┘            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Example Mapping Output to BDD
+
+| Example Map Element | BDD Equivalent |
+|---------------------|----------------|
+| Rule | Feature/Background |
+| Example | Scenario |
+| Counter-example | Negative Scenario |
+| Question | Clarified in Background or Rules |
+
+---
+
+## AI-Assisted BDD Best Practices
+
+### 1. AI for Scenario Generation
+
+Provide the AI with user stories and ask for Gherkin scenarios:
+
+```
+User Story:
+As an online shopper
+I want to see estimated delivery dates
+So that I can plan my purchases
+
+AI generates:
+Feature: Delivery Date Estimation
+  As an online shopper
+  I want to see estimated delivery dates
+  So that I can plan my purchases
+
+  Scenario: Standard delivery estimation
+    Given I am viewing a product available for shipping
+    When I check the product page
+    Then I should see an estimated delivery date
+    And the date should be 3-5 business days from today
+
+  Scenario: Express delivery option
+    Given I am viewing a product with express shipping
+    When I select express shipping
+    Then I should see an estimated delivery date
+    And the date should be 1-2 business days from today
+```
+
+### 2. AI for Edge Case Discovery
+
+Ask AI to identify missing scenarios:
+
+```
+Current scenarios:
+1. Valid order placement
+2. Order with insufficient stock
+3. Order with invalid payment
+
+AI identifies missing:
+4. Order during promotional period
+5. Order with partially available items
+6. Order with shipping address change
+7. Order cancellation before processing
+```
+
+### 3. AI for Step Definition Generation
+
+After writing scenarios, AI generates initial step definitions:
+
+```typescript
+// AI-generated step definitions (stub)
+import { Given, When, Then } from '@cucumber/cucumber';
+import { expect } from 'chai';
+import { ShoppingCart } from '../../src/cart/shopping-cart';
+
+let cart: ShoppingCart;
+
+Given('I have an empty shopping cart', () => {
+    cart = new ShoppingCart();
+});
+
+When('I add {string} to the cart', async function (productName: string) {
+    // TODO: Implement step definition
+    // HINT: Use ProductCatalog to find product by name
+});
+
+Then('the cart should contain {int} item(s)', async function (itemCount: number) {
+    // TODO: Implement step definition
+    // HINT: Check cart.getItems().length
+});
+```
+
+### 4. AI for BDD Code Review
+
+Use AI to review Gherkin scenarios for quality:
+
+| Check | AI Review Focus |
+|-------|-----------------|
+| Clarity | Are scenarios understandable by non-technical stakeholders? |
+| Completeness | Are all acceptance criteria covered? |
+| Independence | Can scenarios run in any order? |
+| Traceability | Do scenarios map to user stories? |
+
+---
+
 ## References and Further Reading
 
 1. North, Dan. "Introducing BDD." Dan North Blog, 2006.
@@ -729,3 +896,30 @@ Ask AI to generate human-readable documentation from Gherkin scenarios for stake
 4. "Gherkin Syntax Reference." Cucumber Documentation.
 5. "Behaviour-Driven Development." Agile Alliance.
 6. Smart, John Ferguson. "BDD in Action: Behavior-driven development for the whole software lifecycle." Manning, 2014.
+7. AI Coding Exercise Repository - BDD and Specification Patterns (internal reference)
+
+---
+
+## BDD Checklist
+
+### Before Writing Scenarios
+
+- [ ] User story has clear acceptance criteria
+- [ ] Stakeholders have provided examples
+- [ ] Edge cases have been identified
+- [ ] Technical approach is understood
+
+### While Writing Scenarios
+
+- [ ] Scenarios use Given-When-Then structure
+- [ ] Language is business-focused, not technical
+- [ ] Each scenario tests one behavior
+- [ ] Scenario names are descriptive
+- [ ] Examples use realistic data
+
+### After Writing Scenarios
+
+- [ ] Stakeholders have reviewed scenarios
+- [ ] Scenarios are linked to requirements
+- [ ] Step definitions can be implemented
+- [ ] Automated tests will cover scenarios

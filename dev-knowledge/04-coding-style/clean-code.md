@@ -441,6 +441,185 @@ class UserRepository implements Repository<User> {
     // User-specific implementation
   }
 }
+
+// Dependency Inversion Principle
+// ✅ Good: Depend on abstractions, not implementations
+interface Logger {
+  info(message: string): void;
+  error(message: string, error?: Error): void;
+}
+
+class ConsoleLogger implements Logger {
+  info(message: string): void {
+    console.log(`INFO: ${message}`);
+  }
+  error(message: string, error?: Error): void {
+    console.error(`ERROR: ${message}`, error);
+  }
+}
+
+class UserService {
+  constructor(private readonly logger: Logger) {}
+
+  async createUser(user: User): Promise<void> {
+    this.logger.info(`Creating user: ${user.email}`);
+    // ...
+  }
+}
+```
+
+---
+
+## Additional SOLID Principles
+
+### Dependency Inversion Principle (DIP)
+
+High-level modules should not depend on low-level modules. Both should depend on abstractions.
+
+```typescript
+// ❌ BAD - High-level depends on low-level
+class UserService {
+  constructor(private readonly mysqlUserRepository: MySqlUserRepository) {}
+}
+
+// ✅ GOOD - Both depend on abstraction
+interface UserRepository {
+  findById(id: string): Promise<User | null>;
+  save(user: User): Promise<void>;
+}
+
+class UserService {
+  constructor(private readonly userRepository: UserRepository) {}
+}
+
+// Low-level module implements the abstraction
+class MySqlUserRepository implements UserRepository {
+  // Implementation
+}
+```
+
+### Interface Segregation Principle (ISP)
+
+Clients should not be forced to depend on interfaces they do not use.
+
+```typescript
+// ❌ BAD - Fat interface forces unused methods
+interface Worker {
+  work(): void;
+  eat(): void;
+  sleep(): void;
+}
+
+class Robot implements Worker {
+  work() { /* ... */ }
+  eat() { throw new Error('Robots do not eat'); }
+  sleep() { throw new Error('Robots do not sleep'); }
+}
+
+// ✅ GOOD - Segregated interfaces
+interface Workable {
+  work(): void;
+}
+
+interface Eatable {
+  eat(): void;
+}
+
+interface Sleepable {
+  sleep(): void;
+}
+
+class Human implements Workable, Eatable, Sleepable {
+  work() { /* ... */ }
+  eat() { /* ... */ }
+  sleep() { /* ... */ }
+}
+
+class Robot implements Workable {
+  work() { /* ... */ }
+}
+```
+
+### Liskov Substitution Principle (LSP)
+
+Subtypes must be substitutable for their base types without altering correctness.
+
+```typescript
+// ❌ BAD - Square violates LSP (is-a relationship)
+class Rectangle {
+  constructor(protected width: number, protected height: number) {}
+  setWidth(width: number) { this.width = width; }
+  setHeight(height: number) { this.height = height; }
+  area() { return this.width * this.height; }
+}
+
+class Square extends Rectangle {
+  constructor(size: number) {
+    super(size, size);
+  }
+  // Breaking LSP: setting width changes height unexpectedly
+  setWidth(width: number) {
+    this.width = width;
+    this.height = width; // Violates expectation
+  }
+}
+
+// ✅ GOOD - Separate hierarchies or careful design
+interface Shape {
+  area(): number;
+}
+
+class Rectangle implements Shape {
+  constructor(private width: number, private height: number) {}
+  area() { return this.width * this.height; }
+}
+
+class Square implements Shape {
+  constructor(private size: number) {}
+  area() { return this.size * this.size; }
+}
+```
+
+### Open/Closed Principle (OCP)
+
+Software entities should be open for extension but closed for modification.
+
+```typescript
+// ❌ BAD - Must modify to add new notification type
+class Notifier {
+  notify(type: 'email' | 'sms', message: string): void {
+    if (type === 'email') { /* email logic */ }
+    if (type === 'sms') { /* sms logic */ }
+  }
+}
+
+// ✅ GOOD - Open for extension via strategy pattern
+interface NotificationStrategy {
+  send(message: string): void;
+}
+
+class EmailNotification implements NotificationStrategy {
+  send(message: string): void { /* email logic */ }
+}
+
+class SmsNotification implements NotificationStrategy {
+  send(message: string): void { /* sms logic */ }
+}
+
+class Notifier {
+  private strategies: Map<string, NotificationStrategy> = new Map();
+
+  registerStrategy(type: string, strategy: NotificationStrategy): void {
+    this.strategies.set(type, strategy);
+  }
+
+  notify(type: string, message: string): void {
+    const strategy = this.strategies.get(type);
+    if (strategy) {
+      strategy.send(message);
+    }
+  }
+}
 ```
 
 ## Code Review Checklist

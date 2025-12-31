@@ -1,20 +1,8 @@
-# Domain-Driven Design: Patterns and Principles
+# Strategic Domain-Driven Design
 
-## Overview
+Strategic design addresses the "big picture" of domain architecture, focusing on bounded contexts, ubiquitous language, and context mapping. These patterns help organize complex systems into manageable components with clear boundaries.
 
-Domain-Driven Design (DDD) is an approach to software development that emphasizes collaboration between domain experts and developers to create a shared model of the business domain. First articulated by Eric Evans in his 2003 book "Domain-Driven Design: Tackling Complexity in the Heart of Software," DDD provides a framework for tackling complex domain problems through strategic and tactical design patterns.
-
-DDD is an approach to software development that focuses on modeling the business domain accurately and completely. The key insight is that complex business domains should be reflected in the code structure, making the software a faithful representation of the business concepts it serves.
-
-DDD provides a set of patterns for modeling domain logic, organizing code around business concepts, and managing the complexity of large systems. These patterns help bridge the gap between domain experts' mental models and the actual software implementation.
-
-The patterns in this document have been extracted from real-world refactoring experience and represent universal, timeless principles that apply across different projects and technology stacks.
-
----
-
-## Strategic Design
-
-Strategic design addresses the "big picture" of the domain architecture:
+## Domain Landscape
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -39,11 +27,9 @@ Strategic design addresses the "big picture" of the domain architecture:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
----
-
 ## The Ubiquitous Language
 
-The Ubiquitous Language is the shared vocabulary used by all team members:
+The Ubiquitous Language is the shared vocabulary used by all team members, bridging the gap between domain experts and developers. It must be used consistently in code, documentation, and conversations.
 
 ```typescript
 // Anti-pattern: Mixing technical and domain language
@@ -51,7 +37,6 @@ class OrderService {
   async processOrd() {
     const ord = await this.repo.findById(id);
     if (ord.status !== 'PENDING') throw new Error('Invalid');
-    // ... technical jargon confuses domain experts
   }
 }
 
@@ -66,7 +51,6 @@ class OrderApplicationService {
   async submitOrder(orderId: OrderId): Promise<SubmitOrderResult> {
     const order = await this.orderRepository.findById(orderId);
     
-    // Domain experts understand this:
     if (!order.canBeSubmitted()) {
       throw new OrderCannotBeSubmittedError(order.status);
     }
@@ -84,11 +68,15 @@ class OrderApplicationService {
 }
 ```
 
----
+**Key Principles:**
+- Same terms in code and domain conversations
+- No translation between technical and business language
+- Evolves as understanding deepens
+- Validated through conversation with domain experts
 
 ## Bounded Contexts
 
-A Bounded Context is a boundary within which a particular domain model applies:
+A Bounded Context is a boundary within which a particular domain model applies. Each bounded context has its own ubiquitous language and explicit boundaries.
 
 ```typescript
 // Order Bounded Context
@@ -113,16 +101,6 @@ namespace OrderContext {
     DELIVERED = 'DELIVERED',
     CANCELLED = 'CANCELLED'
   }
-
-  export class Order {
-    submit(): void {
-      if (this.status !== OrderStatus.DRAFT) {
-        throw new InvalidOrderStateTransitionError();
-      }
-      this.status = OrderStatus.SUBMITTED;
-      this.addDomainEvent(new OrderSubmittedEvent(this.id));
-    }
-  }
 }
 
 // Customer Bounded Context - Different model for same concept
@@ -137,7 +115,83 @@ namespace CustomerContext {
 }
 ```
 
----
+**Key Principles:**
+- Each bounded context has its own ubiquitous language
+- Contexts communicate through well-defined interfaces
+- No sharing of domain logic between contexts
+- Explicit boundaries prevent conceptual confusion
+
+## Context Mapping
+
+Context Map showing relationships between bounded contexts:
+
+```typescript
+const contextMap = {
+  upstream: {
+    name: 'OrderManagement',
+    responsibilities: [
+      'Order creation',
+      'Order lifecycle management',
+      'Order history'
+    ]
+  },
+  
+  downstream: {
+    name: 'Inventory',
+    relationship: 'Customer-Supplier',
+    protocol: 'Domain Events'
+  },
+  
+  inventoryACL: {
+    name: 'InventoryACL',
+    role: 'Translate between contexts',
+    implementations: [
+      'Event consumer from Inventory context',
+      'Adapter for inventory data format',
+      'Translator for Inventory-specific concepts'
+    ]
+  },
+  
+  shared: {
+    name: 'CoreTypes',
+    sharedBy: ['OrderContext', 'CustomerContext', 'InventoryContext'],
+    artifacts: [
+      'Money (value object)',
+      'Address (value object)',
+      'Event types (domain events)'
+    ]
+  }
+};
+```
+
+### Context Mapping Patterns
+
+| Pattern | Description | Use Case |
+|---------|-------------|----------|
+| **Shared Kernel** | Shared domain code between contexts | Common types, utilities |
+| **Customer-Supplier** | Upstream provides, downstream consumes | Service relationships |
+| **Conformist** | Downstream adapts to upstream model | Legacy system integration |
+| **Anticorruption Layer** | Translation layer between contexts | Legacy migration |
+| **Open Host Service** | Published language for integration | API design |
+| **Published Language** | Documented exchange format | External integration |
+
+## Subdomains
+
+Identifying and classifying subdomains helps prioritize development effort:
+
+| Subdomain Type | Description | Example |
+|----------------|-------------|---------|
+| **Core Domain** | Unique business value, competitive advantage | Booking engine |
+| **Supporting Domain** | Necessary but not differentiating | Reporting |
+| **Generic Domain** | Common solutions, commodity | Authentication |
+
+## Strategic Design Process
+
+1. **Domain Exploration**: Collaborate with domain experts to understand the business
+2. **Context Identification**: Identify bounded contexts and their boundaries
+3. **Language Definition**: Establish ubiquitous language for each context
+4. **Context Mapping**: Define relationships between contexts
+5. **Integration Design**: Design interfaces and event flows between contexts
 
 ## Tactical Design Patterns
 

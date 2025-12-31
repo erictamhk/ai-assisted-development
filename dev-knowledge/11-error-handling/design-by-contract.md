@@ -425,3 +425,289 @@ Output:
 - "Design by Contract" by Bertrand Meyer
 - Contracts.ts library
 - Eiffel Programming Language
+- ref/engineering/development/DEVELOPMENT_GUIDELINES.md - Development guidelines
+- ref/engineering/design_by_contract/DESIGN_BY_CONTRACT.md - Additional patterns
+
+---
+
+## Appendix: Contract Patterns from Development Guidelines
+
+### Command/Input Validation Pattern
+
+The Command pattern with Input validation is a common contract pattern:
+
+```typescript
+interface Input {
+  validate(): void;
+}
+
+interface Command<INPUT extends Input, OUTPUT> {
+  execute(input: INPUT): Promise<OUTPUT>;
+}
+
+class AddTaskService implements Command<AddTaskInput, AddTaskOutput> {
+  async execute(input: AddTaskInput): Promise<AddTaskOutput> {
+    // Precondition - validate input
+    input.validate();
+
+    // Business logic
+    const task = Task.create(input.description);
+    await this.repository.save(task);
+
+    return AddTaskOutput.success(task.id.value);
+  }
+}
+
+class AddTaskInput implements Input {
+  constructor(
+    public readonly description: string,
+    public readonly projectId?: string
+  ) {}
+
+  validate(): void {
+    if (!this.description || this.description.trim().length === 0) {
+      throw new Error('Description cannot be empty');
+    }
+    if (this.description.length > 500) {
+      throw new Error('Description cannot exceed 500 characters');
+    }
+  }
+}
+```
+
+### Contract Utility Functions
+
+Use `require()` and `reject()` for preconditions:
+
+```typescript
+export function require(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function reject(condition: boolean, message: string): void {
+  if (condition) {
+    throw new Error(message);
+  }
+}
+
+// Usage
+class Task {
+  setDescription(description: string): void {
+    require(!description, 'Description cannot be empty');
+    require(description.length <= 500, 'Description too long');
+    this.description = description;
+  }
+}
+```
+
+### Domain Invariants with State Transitions
+
+Enforce domain rules through state transitions:
+
+```typescript
+class Order {
+  setStatus(status: OrderStatus): void {
+    const currentStatus = this.status;
+
+    // Domain invariant: Status transition rules
+    if (currentStatus === OrderStatus.COMPLETED && status !== OrderStatus.COMPLETED) {
+      throw new Error('Cannot change status of completed order');
+    }
+
+    if (currentStatus === OrderStatus.CANCELLED && status !== OrderStatus.CANCELLED) {
+      throw new Error('Cannot change status of cancelled order');
+    }
+
+    // Valid transitions
+    const validTransitions = {
+      [OrderStatus.PENDING]: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
+      [OrderStatus.PROCESSING]: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
+      [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED, OrderStatus.RETURNED]
+    };
+
+    const allowedTransitions = validTransitions[currentStatus] || [];
+    if (!allowedTransitions.includes(status)) {
+      throw new Error(`Invalid status transition: ${currentStatus} → ${status}`);
+    }
+
+    this.status = status;
+    this.updatedAt = new Date();
+  }
+}
+```
+
+### Postcondition with Rollback
+
+Ensure postconditions and rollback on failure:
+
+```typescript
+class ShoppingCart {
+  private items: CartItem[] = [];
+  private readonly totalLimit: Money;
+
+  addItem(item: CartItem): void {
+    // Precondition
+    if (!item) {
+      throw new Error('Item cannot be null');
+    }
+
+    // Action
+    this.items.push(item);
+
+    // Postcondition - verify invariant
+    const total = this.calculateTotal();
+    if (total.greaterThan(this.totalLimit)) {
+      // Rollback
+      this.items.pop();
+      throw new Error('Total would exceed limit');
+    }
+  }
+}
+```
+
+---
+
+## 8. Contract Patterns from Guidelines
+
+### 8.1 Precondition Checking (from CONSTITUTION.md)
+
+Use contract libraries for pre/postconditions:
+
+```typescript
+// Contract library usage
+class AccountService {
+  @requires('amount > 0', 'Deposit amount must be positive')
+  @requires('accountId != null', 'Account ID is required')
+  @ensures('balance >= oldBalance', 'Balance must increase')
+  async deposit(accountId: string, amount: number): Promise<void> {
+    const account = await this.repository.findById(accountId);
+    account.deposit(amount);
+    await this.repository.save(account);
+  }
+}
+
+// Using require/reject pattern
+class AccountService {
+  async withdraw(accountId: string, amount: number): Promise<void> {
+    require(amount > 0, 'Amount must be positive');
+    require(accountId != null, 'Account ID is required');
+    
+    const account = await this.repository.findById(accountId);
+    reject(account.isClosed, 'Cannot withdraw from closed account');
+    reject(account.balance < amount, 'Insufficient funds');
+    
+    account.withdraw(amount);
+    await this.repository.save(account);
+  }
+}
+```
+
+### 8.2 Validation Layers (from CONSTITUTION.md)
+
+| Layer | Validation Approach |
+|-------|---------------------|
+| **Value Objects** | Validate in constructor, throw exceptions |
+| **Use Cases** | Validate inputs with contract libraries |
+| **Domain Entities** | Enforce invariants in methods |
+| **Controllers** | Handle user-facing error messages |
+
+### 8.3 Domain Validation Rules (from ai_agent_development_guidelines.md)
+
+**Value Objects:**
+```typescript
+// Validate in constructor/compact constructor
+public record ProjectName(String value) implements ValueObject {
+    public ProjectName {
+        if (value == null || value.isEmpty())
+            throw new RuntimeException("Name cannot be empty");
+    }
+}
+```
+
+**Use Cases:**
+```typescript
+// Validate inputs before business logic
+class AddTaskUseCase {
+  async execute(input: AddTaskInput): Promise<CqrsOutput> {
+    require(input.description != null, 'Description is required');
+    require(input.description.length <= 500, 'Description too long');
+    
+    const task = Task.create(input.description);
+    await this.repository.save(task);
+    
+    return CqrsOutput.success(task.id);
+  }
+}
+```
+
+**Domain Entities:**
+```typescript
+// Enforce invariants in methods
+class Task {
+  setDone(done: boolean): void {
+    if (this.status === TaskStatus.COMPLETED) {
+      throw new RuntimeException('Task already completed');
+    }
+    this.status = done ? TaskStatus.COMPLETED : TaskStatus.PENDING;
+  }
+}
+```
+
+---
+
+## 9. Interface Contracts (from ref/engineering/design_by_contract/)
+
+### 9.1 Defining Contracts in Interfaces
+
+```typescript
+interface IPostRepository {
+  /**
+   * @precondition postId must be a valid PostId value
+   * @precondition postId cannot be null or undefined
+   *
+   * @postcondition Returns Post entity if found
+   * @postcondition Returns null if Post not found
+   * @postcondition Post contains all fields if found
+   *
+   * @invariant Repository state unchanged (read-only operation)
+   */
+  findById(postId: PostId): Promise<Post | null>;
+
+  /**
+   * @precondition post must not be null
+   * @precondition post must satisfy business invariants
+   * @precondition post.id must be valid PostId
+   *
+   * @postcondition Post is persisted
+   * @postcondition Post can be retrieved by findById
+   * @postcondition Post.id is generated if not set
+   *
+   * @invariant Repository contains valid Post entities
+   */
+  save(post: Post): Promise<void>;
+}
+```
+
+### 9.2 Contract Documentation Tags
+
+| Tag | Purpose | Example |
+|-----|---------|---------|
+| `@precondition` | What must be true before call | `@precondition userId must be valid` |
+| `@postcondition` | What must be true after call | `@postcondition Returns User entity if found` |
+| `@invariant` | What must always be true | `@invariant Balance cannot be negative` |
+| `@throws` | Exceptions that may be thrown | `@throws InsufficientFundsError` |
+| `@returns` | Return value description | `@returns Result containing User or error` |
+
+---
+
+## 10. References
+
+1. Meyer, Bertrand. "Object-Oriented Software Construction." Prentice Hall, 1997.
+2. ref/engineering/development/DEVELOPMENT_GUIDELINES.md - Development guidelines
+3. ref/engineering/design_by_contract/DESIGN_BY_CONTRACT.md - Interface contracts
+4. ref/CONSTITUTION.md - Error handling conventions
+5. ref/ai_agent_development_guidelines.md - Domain error patterns
+6. "Design by Contract" - Wikipedia
+7. "Contracts.ts" library

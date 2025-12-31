@@ -846,7 +846,207 @@ Use AI to describe and generate diagrams from documentation.
 
 ---
 
+## Living Documentation Architecture
+
+Living documentation is built on the principle that documentation should be derived from the same sources as the code itself. This creates a single source of truth that stays synchronized with the codebase.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                  LIVING DOCUMENTATION ARCHITECTURE                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │                    SOURCE OF TRUTH                               │    │
+│  │                                                                 │    │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                │    │
+│  │  │    CODE     │ │   TESTS     │ │  SPECS      │                │    │
+│  │  │             │ │             │ │             │                │    │
+│  │  │  • Classes  │ │  • Unit     │ │  • Gherkin  │                │    │
+│  │  │  • Modules  │ │  • BDD      │ │  • OpenAPI  │                │    │
+│  │  │  • Functions│ │  • Contract │ │  • Schema   │                │    │
+│  │  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘                │    │
+│  │         │               │               │                         │    │
+│  └─────────┼───────────────┼───────────────┼─────────────────────────┘    │
+│            │               │               │                              │
+│            ▼               ▼               ▼                              │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │                    DOCUMENTATION BUILDERS                        │    │
+│  │                                                                 │    │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                │    │
+│  │  │   JSDoc/    │ │   Test      │ │   Spec      │                │    │
+│  │  │   TSDoc     │ │   Reports   │ │   Reports   │                │    │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘                │    │
+│  │                                                                 │    │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                │    │
+│  │  │   API       │ │   BDD       │ │   Architecture│               │    │
+│  │  │   Docs      │ │   Scenarios │ │   Diagrams  │                │    │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘                │    │
+│  │                                                                 │    │
+│  └─────────────────────────────┬───────────────────────────────────┘    │
+│                                │                                         │
+│                                ▼                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │                    OUTPUT FORMATS                                │    │
+│  │                                                                 │    │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                │    │
+│  │  │   HTML      │ │   Markdown  │ │   PDF       │                │    │
+│  │  │   Docs      │ │   Files     │ │   Reports   │                │    │
+│  │  └─────────────┘ └─────────────┘ └──────┬──────┘                │    │
+│  │                                           │                        │    │
+│  │  ┌─────────────┐ ┌─────────────┐          │                        │    │
+│  │  │   Wiki      │ │   Confluence│          │                        │    │
+│  │  │   Pages     │ │   Export    │          │                        │    │
+│  │  └─────────────┘ └─────────────┘          │                        │    │
+│  │                                           │                        │    │
+│  │         ┌─────────────────────────────────┘                        │    │
+│  │         │                                                          │    │
+│  │         ▼                                                          │    │
+│  │  ┌─────────────────────────────────────────────────────────────┐  │    │
+│  │  │               LIVING DOCUMENTATION PORTAL                    │  │    │
+│  │  │                                                               │  │    │
+│  │  │   • Always up-to-date                                        │  │    │
+│  │  │   • Searchable                                               │  │    │
+│  │  │   • Cross-referenced                                         │  │    │
+│  │  │   • Generated continuously                                   │  │    │
+│  │  └─────────────────────────────────────────────────────────────┘  │    │
+│  │                                                                 │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Documentation Sources and Their Outputs
+
+| Source Type | Documentation Generated | Tools |
+|-------------|------------------------|-------|
+| Code Comments | API documentation, Usage guides | TypeDoc, JSDoc |
+| Unit Tests | Function behavior, Edge cases | Test reports |
+| BDD Scenarios | Feature documentation, User guides | Cucumber reports |
+| OpenAPI Specs | API reference, Integration guides | Swagger UI |
+| Architecture ADRs | Design decisions, Rationales | Markdown, GitBook |
+
+---
+
+## Tests as Living Documentation
+
+BDD tests and executable specifications serve as living documentation that is always in sync with the codebase.
+
+### BDD Tests as Documentation
+
+```typescript
+/**
+ * User Registration Feature
+ * 
+ * @see {@link UserRegistration.test.ts} for complete behavior specification
+ * 
+ * ## Requirements
+ * - Email must be unique
+ * - Password must be at least 8 characters
+ * - Password must contain uppercase, lowercase, number, and special character
+ * - Verification email must be sent
+ * 
+ * ## Examples
+ */
+describe('User Registration', () => {
+  
+  it('should register user with valid credentials', async () => {
+    const result = await registerUser({
+      email: 'newuser@example.com',
+      password: 'SecurePass123!',
+      name: 'John Doe'
+    });
+    
+    expect(result.success).toBe(true);
+    expect(result.user.email).toBe('newuser@example.com');
+  });
+});
+```
+
+### README Integration with Tests
+
+```markdown
+## User Registration
+
+See [User Registration Tests](src/features/user/tests/integration/UserRegistration.test.ts) 
+for complete behavior specification.
+
+### Valid Registration Scenarios
+- [ ] New user registration with valid email and password
+- [ ] Registration with unique email address
+- [ ] Automatic username generation
+
+### Invalid Registration Scenarios  
+- [ ] Registration with duplicate email (Error: EMAIL_EXISTS)
+- [ ] Registration with weak password (Error: WEAK_PASSWORD)
+- [ ] Registration with missing required fields (Error: VALIDATION_ERROR)
+```
+
+---
+
+## Collaboration and Living Documentation
+
+Living documentation is fundamentally about collaboration - making knowledge accessible and maintainable across the team.
+
+### Documentation Ownership
+
+| Documentation Type | Owner | Update Trigger |
+|-------------------|-------|----------------|
+| API Documentation | Development Team | Code changes |
+| BDD Scenarios | Product + QA | Feature changes |
+| Architecture Decisions | Architects | Design changes |
+| User Guides | Technical Writers | Release updates |
+| Runbooks | Operations | Process changes |
+
+### Documentation Review Process
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                 DOCUMENTATION REVIEW WORKFLOW                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                │
+│  │   DOCUMENT  │────►│    AI       │────►│   HUMAN     │                │
+│  │   CHANGE    │     │   REVIEW    │     │   REVIEW    │                │
+│  └─────────────┘     └─────────────┘     └─────────────┘                │
+│        │                                       │                        │
+│        │                                       │                        │
+│        ▼                                       ▼                        │
+│  ┌─────────────┐                         ┌─────────────┐                │
+│  │  Automated  │                         │   APPROVED  │                │
+│  │  Generation │                         │   / REJECT  │                │
+│  └─────────────┘                         └─────────────┘                │
+│                                                │                        │
+│                                                ▼                        │
+│                                         ┌─────────────┐                │
+│                                         │  PUBLISHED  │                │
+│                                         │   TO WIKI   │                │
+│                                         └─────────────┘                │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Cross-Team Documentation
+
+Living documentation supports collaboration across different teams:
+
+- **Shared Language**: Tests and specs provide a common vocabulary
+- **Onboarding**: New team members can understand the system through documentation
+- **Knowledge Transfer**: Reduces dependency on individual knowledge
+- **Stakeholder Visibility**: Non-technical stakeholders can understand system behavior
+
+---
+
 ## References and Further Reading
+
+1. Martraire, Cyrille. "Living Documentation: Continuous Documentation with Tests." Addison-Wesley, 2019.
+2. "TypeDoc Documentation." TypeDoc.
+3. "Living Documentation." Martin Fowler.
+4. "Documenting Architecture Decisions." Michael Nygard.
+5. "TSDoc: TypeScript Documentation Standard." Microsoft.
+6. ref/engineering/behavior_driven/BEHAVIOR_DRIVEN_DEVELOPMENT.md - BDD methodology
+7. ref/engineering/specification_by_example/SPECIFICATION_BY_EXAMPLE.md - Specification by Example
+8. doc/behavior-driven-development.md - BDD comprehensive guide
+9. doc/executable-specifications.md - Executable specifications guide
 
 1. Martraire, Cyrille. "Living Documentation: Continuous Documentation with Tests." Addison-Wesley, 2019.
 2. "TypeDoc Documentation." TypeDoc.

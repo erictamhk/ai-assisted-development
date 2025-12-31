@@ -498,16 +498,162 @@ Deviations should be reviewed but won't fail CI:
 - Handle errors explicitly
 
 ## TIER 3: GUIDANCE (Consider Following)
-Style preferences and suggestions:
-- Prefer const over let
-- Use arrow functions for callbacks
-- Sort imports alphabetically
-
-## See Also
-- Full coding standards: docs/standards.md
-- Security requirements: docs/security.md
-- Architecture patterns: docs/patterns.md
+These are recommendations that improve quality but have flexibility:
+- Organize files by feature
+- Use descriptive variable names
+- Add helpful comments for complex logic
 ```
+
+### Strategy 2: On-Demand Rule Loading
+
+For large projects, use on-demand loading to prevent context overflow:
+
+```json
+// opencode.json
+{
+  "instructions": ["AGENTS.md"],
+  "onDemandRules": [
+    {
+      "taskType": "create",
+      "rules": ["use-case-patterns.md"]
+    },
+    {
+      "taskType": "edit",
+      "rules": ["editing-guidelines.md"]
+    },
+    {
+      "taskType": "review",
+      "rules": ["code-review-checklist.md"]
+    },
+    {
+      "taskType": "test",
+      "rules": ["testing-conventions.md"]
+    }
+  ],
+  "load_strategy": "on-demand"
+}
+```
+
+### Strategy 3: Concrete Examples Over Abstract Rules
+
+Instead of:
+```markdown
+"Follow the existing code style"
+```
+
+Use:
+```markdown
+"Follow this pattern for creating a new use case:
+
+```typescript
+// ✅ CORRECT pattern
+interface CreateProductUseCase {
+  class CreateProductInput implements Input { ... }
+  class CreateProductOutput implements Output { ... }
+  execute(input: CreateProductInput): Promise<CreateProductOutput>;
+}
+```
+
+### Strategy 4: Scoped Tasks
+
+Reduce scope to increase compliance:
+
+| Instead of | Do This |
+|------------|---------|
+| "Implement feature X" | "Add the `calculateTotal()` method following existing patterns" |
+| "Fix all bugs" | "Fix the null pointer exception in line 45" |
+| "Refactor module" | "Extract this function into a separate utility" |
+
+### Strategy 5: Validation Gates
+
+```bash
+# Automated validation after AI generation
+npm run lint          # Code style check
+npm run typecheck     # Type safety check
+npm run test          # Behavior verification
+npm run security-scan # Security check
+```
+
+Only human-reviewed code passes to production.
+
+---
+
+## Practical Workflow Recommendations
+
+### For Development Teams
+
+1. **Start with a minimal AGENTS.md**
+   - Focus on critical rules only
+   - Add rules as issues are discovered
+   - Review and refine quarterly
+
+2. **Use on-demand loading**
+   - Tier 1: Always loaded (critical)
+   - Tier 2: Task-specific (important)
+   - Tier 3: Reference only (guidance)
+
+3. **Implement multiple review passes**
+   - AI self-review against rules
+   - Automated validation (lint, test)
+   - Human code review
+
+4. **Track AI-generated code separately**
+   - Mark AI-generated commits
+   - Monitor error rates
+   - Iterate on rules based on failures
+
+5. **Invest in examples over documentation**
+   - Real-world examples are more effective
+   - Keep examples up to date
+   - Include both correct and incorrect patterns
+
+### For Tooling
+
+1. **Support AGENTS.md discovery**
+   - Hierarchical file finding
+   - Progressive disclosure
+   - Override mechanisms
+
+2. **Provide rule loading optimization**
+   - Smart caching
+   - Token budgeting
+   - Relevance scoring
+
+3. **Enable validation integration**
+   - Linting feedback
+   - Test result display
+   - Security scanning
+
+---
+
+## References
+
+1. Anthropic Context Rot Study - Context length impact on accuracy
+2. doc/prompt-engineering-ai-agents.md - Prompt Engineering Guide
+3. doc/agents-md-cli-ai-agent-tools.md - CLI AI Agent Tools
+4. doc/on-demand-rule-loading.md - On-Demand Rule Loading
+5. ref/engineering/context_engineering/CAAP.md - Context Engineering patterns
+6. ref/opencode-analysis.md - OpenCode analysis with context management
+
+---
+
+## Appendix: Context Budget Calculator
+
+Use this to estimate AGENTS.md size:
+
+| Element | Typical Tokens | Notes |
+|---------|---------------|-------|
+| Project overview | 500-1000 | Brief description |
+| Tech stack | 300-500 | Key technologies |
+| Architecture | 500-1000 | High-level patterns |
+| Setup commands | 200-400 | Build/test commands |
+| Code standards | 2000-5000 | Conventions, patterns |
+| Testing requirements | 500-1000 | Coverage, types |
+| Security guidelines | 500-1000 | Constraints, rules |
+| Examples | Variable | Code samples |
+
+**Target**: Keep AGENTS.md under 32K tokens for optimal performance
+**Recommendation**: Use on-demand loading for detailed rules
 
 ### Strategy 2: Rule Prioritization in Context
 

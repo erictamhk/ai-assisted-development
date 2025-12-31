@@ -1642,3 +1642,631 @@ class UseCase {
 2. Freeman, Eric, and Elisabeth Robson. "Head First Design Patterns." O'Reilly, 2004.
 3. Refactoring Guru. "Design Patterns." https://refactoring.guru/design-patterns
 4. "AntiPatterns: Refactoring Software, Architectures, and Projects in Crisis." Brown et al., Wiley, 1998.
+
+---
+
+## Additional Architectural Patterns
+
+### Data Transfer Object (DTO)
+
+```typescript
+// DTO: Plain objects for data transfer between layers
+interface ProductDto {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+}
+
+// ✅ CORRECT: Simple POJO with public fields
+class ProductDtoImpl implements ProductDto {
+  constructor(
+    public id: string,
+    public name: string,
+    public price: number,
+    public category: string
+  ) {}
+}
+
+// ❌ INCORRECT: Adding behavior to DTOs
+class BadProductDto {
+  constructor(
+    public id: string,
+    public name: string,
+    public price: number
+  ) {}
+
+  // DTOs should NOT have behavior - this is wrong!
+  calculateDiscount(): number {
+    return this.price * 0.1;
+  }
+}
+```
+
+### Persistent Object (PO)
+
+```typescript
+// PO: Database entity representation, separate from domain
+interface ProductPo {
+  id: string;
+  name: string;
+  price_cents: number;
+  category_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// PO is implementation-specific, may use framework annotations
+class JpaProductPo implements ProductPo {
+  constructor(
+    @Id public id: string,
+    @Column public name: string,
+    @Column(name = "price_cents") public priceCents: number,
+    @ManyToOne @JoinColumn(name = "category_id") public categoryId: string,
+    @Column public createdAt: Date,
+    @Column public updatedAt: Date
+  ) {}
+}
+```
+
+### Mapper Pattern
+
+```typescript
+// Mapper: Convert between Domain, DTO, and PO representations
+class ProductMapper {
+  // Domain → DTO
+  static toDto(product: Product): ProductDto {
+    return {
+      id: product.id.value,
+      name: product.name.value,
+      price: product.price.amount,
+      category: product.category.value
+    };
+  }
+
+  // PO → Domain
+  static toDomain(po: ProductPo): Product {
+    return Product.reconstruct(
+      ProductId.fromString(po.id),
+      ProductName.of(po.name),
+      Money.fromCents(po.priceCents),
+      CategoryId.fromString(po.categoryId)
+    );
+  }
+
+  // Domain → PO
+  static toPo(product: Product): ProductPo {
+    return {
+      id: product.id.value,
+      name: product.name.value,
+      price_cents: product.price.toCents(),
+      category_id: product.category.value,
+      created_at: product.createdAt,
+      updated_at: new Date()
+    };
+  }
+
+  // Collection transformations
+  static toDtoList(products: Product[]): ProductDto[] {
+    return products.map(p => this.toDto(p));
+  }
+
+  static toDomainList(pos: ProductPo[]): Product[] {
+    return pos.map(po => this.toDomain(po));
+  }
+}
+```
+
+### Null Object Pattern
+
+```typescript
+// Null Object: Eliminate null checks with a meaningful no-op
+interface Input {
+  getString(key: string): string | null;
+  getNumber(key: string): number | null;
+}
+
+// Null Input provides sensible defaults
+class NullInput implements Input {
+  getString(key: string): string {
+    return '';
+  }
+
+  getNumber(key: string): number {
+    return 0;
+  }
+
+  getBoolean(key: string): boolean {
+    return false;
+  }
+
+  hasValue(key: string): boolean {
+    return false;
+  }
+}
+
+// Usage - no null checks needed
+class UserService {
+  constructor(private input: Input) {}
+
+  createUser(): void {
+    const name = this.input.getString('name');
+    const age = this.input.getNumber('age');
+
+    // No null checks needed - NullInput returns empty values
+    if (name && age > 0) {
+      // Process user
+    }
+  }
+}
+```
+
+### Optional Pattern
+
+```typescript
+// Optional: Handle potentially missing values explicitly
+interface UserRepository {
+  findById(id: UserId): Promise<Optional<User>>;
+  findByEmail(email: string): Promise<Optional<User>>;
+}
+
+class UserService {
+  constructor(private userRepository: UserRepository) {}
+
+  async getUser(id: UserId): Promise<UserDto | null> {
+    const user = await this.userRepository.findById(id);
+
+    // Transform optional to result
+    return user
+      .map(u => UserMapper.toDto(u))
+      .orElse(null);
+  }
+
+  async getUserByEmail(email: string): Promise<UserDto> {
+    const user = await this.userRepository.findByEmail(email);
+
+    // Throw if not found - clear intent
+    return user
+      .map(u => UserMapper.toDto(u))
+      .orElseThrow(() => new NotFoundError(`User with email ${email} not found`));
+  }
+
+  async findActiveUsers(): Promise<UserDto[]> {
+    const users = await this.userRepository.findAll();
+
+    // Chain operations
+    return users
+      .filter(u => u.isActive())
+      .map(u => UserMapper.toDto(u))
+      .toList();
+  }
+}
+```
+
+### Builder Pattern (Fluent API)
+
+```typescript
+// Builder: Construct complex objects step by step with method chaining
+interface CqrsOutputBuilder<T> {
+  succeed(): CqrsOutput<T>;
+  succeedWith(data: T): CqrsOutput<T>;
+  fail(message: string): CqrsOutput<T>;
+  withError(error: Error): CqrsOutput<T>;
+}
+
+class CqrsOutput<T> {
+  private constructor(
+    private readonly _success: boolean,
+    private readonly _data: T | null,
+    private readonly _message: string | null,
+    private readonly _error: Error | null
+  ) {}
+
+  get success(): boolean {
+    return this._success;
+  }
+
+  get data(): T | null {
+    return this._data;
+  }
+
+  get message(): string | null {
+    return this._message;
+  }
+
+  get error(): Error | null {
+    return this._error;
+  }
+
+  static create<T>(): CqrsOutputBuilder<T> {
+    return new CqrsOutputBuilderImpl<T>();
+  }
+
+  static of<T>(data: T): CqrsOutput<T> {
+    return new CqrsOutput(true, data, null, null);
+  }
+
+  static success<T>(message: string): CqrsOutput<T> {
+    return new CqrsOutput(true, null, message, null);
+  }
+
+  static failure<T>(error: Error): CqrsOutput<T> {
+    return new CqrsOutput(false, null, error.message, error);
+  }
+}
+
+class CqrsOutputBuilderImpl<T> implements CqrsOutputBuilder<T> {
+  private _success = false;
+  private _data: T | null = null;
+  private _message: string | null = null;
+  private _error: Error | null = null;
+
+  succeed(): CqrsOutput<T> {
+    this._success = true;
+    return new CqrsOutput(this._success, this._data, this._message, this._error);
+  }
+
+  succeedWith(data: T): CqrsOutput<T> {
+    this._success = true;
+    this._data = data;
+    return new CqrsOutput(this._success, this._data, this._message, this._error);
+  }
+
+  fail(message: string): CqrsOutput<T> {
+    this._success = false;
+    this._message = message;
+    return new CqrsOutput(this._success, this._data, this._message, this._error);
+  }
+
+  withError(error: Error): CqrsOutput<T> {
+    this._success = false;
+    this._error = error;
+    this._message = error.message;
+    return new CqrsOutput(this._success, this._data, this._message, this._error);
+  }
+}
+
+// Usage - fluent builder pattern
+const result = CqrsOutput.create<UserDto>()
+  .succeedWith(userDto)
+  .data;
+
+const errorResult = CqrsOutput.create<Task>()
+  .fail('Task not found')
+  .message;
+
+const successResult = CqrsOutput.create<Order>()
+  .withError(new ValidationError('Invalid order'))
+  .success;
+```
+
+### Factory Method Pattern (Domain)
+
+```typescript
+// Factory Method: Create objects with validation and business logic
+class ProductName {
+  private constructor(private readonly value: string) {}
+
+  // Static factory method as standard
+  static of(value: string): ProductName {
+    // Validation in factory
+    if (!value || value.trim().length === 0) {
+      throw new Error('Product name cannot be empty');
+    }
+    if (value.length > 100) {
+      throw new Error('Product name cannot exceed 100 characters');
+    }
+    return new ProductName(value.trim());
+  }
+
+  // Alternative factory for special cases
+  static fromExisting(value: string): ProductName {
+    // Bypass validation for reconstructed objects
+    return new ProductName(value);
+  }
+
+  get value(): string {
+    return this.value;
+  }
+}
+
+// Value Object with record (TypeScript)
+class ProductId {
+  constructor(private readonly value: string) {}
+
+  static generate(): ProductId {
+    return new ProductId(UUID.randomUUID().toString());
+  }
+
+  static fromString(value: string): ProductId {
+    if (!value) {
+      throw new Error('Product ID cannot be empty');
+    }
+    return new ProductId(value);
+  }
+
+  get value(): string {
+    return this._value;
+  }
+}
+```
+
+### Read-Only Interface Pattern
+
+```typescript
+// Read-Only Interface: Prevent unauthorized modifications
+interface ReadOnlyProject {
+  readonly id: ProjectId;
+  readonly name: ProjectName;
+  readonly status: ProjectStatus;
+  readonly createdAt: Date;
+  getMembers(): ReadonlyArray<ProjectMember>;
+}
+
+class Project implements ReadOnlyProject {
+  // Public readonly properties
+  readonly id: ProjectId;
+  readonly name: ProjectName;
+  readonly createdAt: Date;
+
+  // Private mutable properties
+  private _status: ProjectStatus;
+  private _members: ProjectMember[] = [];
+
+  constructor(id: ProjectId, name: ProjectName) {
+    this.id = id;
+    this.name = name;
+    this._status = ProjectStatus.ACTIVE;
+    this.createdAt = new Date();
+  }
+
+  // Read-only access to mutable state
+  get status(): ProjectStatus {
+    return this._status;
+  }
+
+  getMembers(): ReadonlyArray<ProjectMember> {
+    return [...this._members];
+  }
+
+  // Modifying methods - only for internal use
+  addMember(member: ProjectMember): void {
+    this._members.push(member);
+  }
+
+  // Return read-only view from domain methods
+  getSnapshot(): ReadOnlyProject {
+    return {
+      id: this.id,
+      name: this.name,
+      status: this._status,
+      createdAt: this.createdAt,
+      getMembers: () => this.getMembers()
+    };
+  }
+}
+```
+
+### Strategy Pattern (Repository Implementations)
+
+```typescript
+// Strategy: Multiple implementations of same interface
+interface UserRepository {
+  findById(id: string): Promise<User | null>;
+  save(user: User): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
+// Strategy 1: In-memory for testing
+class InMemoryUserRepository implements UserRepository {
+  private store: Map<string, User> = new Map();
+
+  async findById(id: string): Promise<User | null> {
+    return this.store.get(id) || null;
+  }
+
+  async save(user: User): Promise<void> {
+    this.store.set(user.id.value, user);
+  }
+
+  async delete(id: string): Promise<void> {
+    this.store.delete(id);
+  }
+}
+
+// Strategy 2: JPA/Spring Data
+class JpaUserRepository implements UserRepository {
+  private crudRepository: SpringDataUserRepository;
+
+  constructor(crudRepository: SpringDataUserRepository) {
+    this.crudRepository = crudRepository;
+  }
+
+  async findById(id: string): Promise<User | null> {
+    const entity = await this.crudRepository.findById(id);
+    return entity ? UserMapper.toDomain(entity) : null;
+  }
+
+  async save(user: User): Promise<void> {
+    const entity = UserMapper.toPo(user);
+    await this.crudRepository.save(entity);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.crudRepository.deleteById(id);
+  }
+}
+
+// Client uses abstraction - interchangeable at runtime
+class UserService {
+  constructor(private repository: UserRepository) {}
+
+  async getUser(id: string): Promise<User | null> {
+    return this.repository.findById(id);
+  }
+}
+```
+
+### Command Pattern (Console Controllers)
+
+```typescript
+// Command: Encapsulate requests as objects
+interface ConsoleCommand {
+  execute(args: string[]): Promise<void>;
+  getName(): string;
+  getDescription(): string;
+}
+
+abstract class AbstractCommand implements ConsoleCommand {
+  abstract getName(): string;
+  abstract getDescription(): string;
+  abstract execute(args: string[]): Promise<void>;
+
+  protected validateArgs(args: string[], required: number): void {
+    if (args.length < required) {
+      throw new Error(`Usage: ${this.getName()} <${Array(required).fill('arg').join('> <')}>`);
+    }
+  }
+}
+
+class AddProjectCommand extends AbstractCommand {
+  constructor(
+    private addProjectUseCase: AddProjectUseCase,
+    private presenter: AddProjectPresenter
+  ) {
+    super();
+  }
+
+  getName(): string {
+    return 'add-project';
+  }
+
+  getDescription(): string {
+    return 'Add a new project';
+  }
+
+  async execute(args: string[]): Promise<void> {
+    this.validateArgs(args, 2);
+
+    const input = new AddProjectInput();
+    input.name = args[0];
+    input.description = args[1];
+
+    const output = await this.addProjectUseCase.execute(input);
+    this.presenter.present(output);
+  }
+}
+
+// Executor pattern for command dispatching
+class CommandExecutor {
+  private commands: Map<string, ConsoleCommand> = new Map();
+
+  register(command: ConsoleCommand): void {
+    this.commands.set(command.getName(), command);
+  }
+
+  async execute(commandName: string, args: string[]): Promise<void> {
+    const command = this.commands.get(commandName);
+    if (!command) {
+      throw new Error(`Unknown command: ${commandName}`);
+    }
+    await command.execute(args);
+  }
+
+  getHelp(): string {
+    const commands = Array.from(this.commands.values())
+      .map(c => `  ${c.getName().padEnd(15)} - ${c.getDescription()}`)
+      .join('\n');
+    return `Available commands:\n${commands}`;
+  }
+}
+```
+
+### Template Method Pattern (Use Cases)
+
+```typescript
+// Template Method: Define execution contract in base class
+interface UseCase<I extends Input, O extends Output> {
+  execute(input: I): Promise<O>;
+}
+
+// Base template with common validation
+abstract class AbstractUseCase<I extends Input, O extends Output> implements UseCase<I, O> {
+  abstract execute(input: I): Promise<O>;
+
+  protected validateInput(input: I): void {
+    // Common validation logic
+    if (!input) {
+      throw new Error('Input cannot be null');
+    }
+  }
+}
+
+// Concrete implementation provides specific behavior
+class CreateOrderUseCase extends AbstractUseCase<CreateOrderInput, CqrsOutput<OrderDto>> {
+  constructor(
+    private orderRepository: Repository<Order, OrderId>,
+    private inventoryService: InventoryService,
+    private eventPublisher: EventPublisher
+  ) {
+    super();
+  }
+
+  async execute(input: CreateOrderInput): Promise<CqrsOutput<OrderDto>> {
+    // Common validation from template
+    this.validateInput(input);
+
+    try {
+      // Specific business logic
+      await this.inventoryService.checkAvailability(input.items);
+
+      const order = Order.create(input);
+
+      this.orderRepository.save(order);
+
+      for (const event of order.getUncommittedEvents()) {
+        this.eventPublisher.publish(event);
+      }
+
+      return CqrsOutput.success(OrderMapper.toDto(order));
+    } catch (error) {
+      return CqrsOutput.failure(error as Error);
+    }
+  }
+}
+```
+
+---
+
+## Pattern Selection Matrix
+
+| Need | GoF Patterns | Architectural Patterns | DDD Patterns |
+|------|--------------|----------------------|--------------|
+| Object creation | Factory, Builder, Prototype, Singleton | Factory Method, Abstract Factory | Factory, Value Object |
+| Structure | Adapter, Bridge, Composite, Decorator, Facade, Flyweight, Proxy | Ports & Adapters, Layered Architecture | Aggregate, Bounded Context |
+| Behavior | Command, Interpreter, Iterator, Mediator, Memento, Observer, State, Strategy, Template Method, Chain of Responsibility | CQRS, Event Sourcing, Use Case | Domain Event, Specification, Service |
+
+## Pattern Relationships
+
+```
+                    ┌─────────────────┐
+                    │  ARCHITECTURAL  │
+                    │     PATTERNS    │
+                    │                 │
+                    │  Clean Arch    │
+                    │  Layered Arch  │
+                    │  Ports/Adapters│
+                    └────────┬────────┘
+                             │
+             ┌───────────────┼───────────────┐
+             │               │               │
+             ▼               ▼               ▼
+    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+    │    GoF      │ │    DDD      │ │   DATA TX   │
+    │   PATTERNS  │ │   PATTERNS  │ │   PATTERNS  │
+    │             │ │             │ │             │
+    │ Creational │ │  Aggregate  │ │    DTO      │
+    │ Structural │ │  Entity     │ │    PO       │
+    │ Behavioral │ │  Value Obj  │ │  Mapper     │
+    └─────────────┘ └─────────────┘ └─────────────┘
+```

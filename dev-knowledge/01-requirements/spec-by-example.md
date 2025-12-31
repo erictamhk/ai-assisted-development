@@ -331,3 +331,504 @@ Output:
 - "Bridging the Communication Gap" by Gojko Adzic
 - Cucumber.io
 - Gherkin Reference
+
+---
+
+## ezSpec: A Domain-Driven Testing Framework
+
+ezSpec is a Java-based testing framework designed for DDD projects. It provides a structured approach to creating executable specifications with rule-based scenario organization.
+
+### Core Concept
+
+Each use case should have at least one corresponding ezSpec test case following these rules:
+
+### Rule Usage Guide
+
+ezSpec's Rule feature organizes test scenarios by business logic:
+
+```java
+// Define Rule constants
+static final String SUCCESS_RULE = "Successful Creation";
+static final String VALIDATION_RULE = "Input Validation";
+
+// Create Rules (after feature.initialize())
+@BeforeAll
+static void beforeAll() {
+    feature = Feature.New(FEATURE_NAME);
+    feature.initialize();
+    
+    feature.NewRule(SUCCESS_RULE);
+    feature.NewRule(VALIDATION_RULE);
+}
+
+// Assign scenarios to rules
+@EzScenario(rule = SUCCESS_RULE)
+public void successful_scenario() { }
+
+// Or use withRule()
+feature.newScenario().withRule(VALIDATION_RULE)
+    .Given("condition", env -> { })
+    .When("action", env -> { })
+    .ThenFailure(env -> { })
+    .Execute();
+```
+
+### Basic Example (without Rules)
+
+```java
+@EzFeature
+@EzFeatureReport
+public class CreateBoardUseCaseTest {
+
+    static String FEATURE_NAME = "Create Board";
+    static Feature feature = Feature.New(FEATURE_NAME);
+
+    @BeforeAll
+    static void beforeAll() {
+        feature.initialize();
+    }
+
+    @EzScenario
+    public void create_a_board() {
+        feature.newScenario()
+                .Given("a user who wants to create a board", env -> {
+                    String boardId = UUID.randomUUID().toString();
+                    String ownerId = UUID.randomUUID().toString();
+                    String boardName = "My Kanban Board";
+
+                    env.put("boardId", boardId)
+                            .put("ownerId", ownerId)
+                            .put("boardName", boardName);
+                })
+                .When("I create a board", env -> {
+                    CreateBoardUseCase createBoardUseCase = getContext().newCreateBoardUseCase();
+                    CreateBoardInput input = CreateBoardInput.create();
+                    input.id = env.gets("boardId");
+                    input.name = env.gets("boardName");
+                    input.ownerId = env.gets("ownerId");
+
+                    var output = createBoardUseCase.execute(input);
+                    env.put("output", output)
+                            .put("input", input);
+                })
+                .ThenSuccess(env -> {
+                    var output = env.get("output", CqrsOutput.class);
+                    assertNotNull(output.getId());
+                    assertEquals(ExitCode.SUCCESS, output.getExitCode());
+                })
+                .And("the board should be persisted", env -> {
+                    var output = env.get("output", CqrsOutput.class);
+                    var input = env.get("input", CreateBoardInput.class);
+                    Board board = getContext().boardRepository()
+                        .findById(BoardId.valueOf(output.getId())).get();
+                    assertEquals(output.getId(), board.getId());
+                    assertEquals(input.name, board.getName());
+                })
+                .And("a board created event should be published", env -> {
+                    List<DomainEvent> events = getContext().getPublishedEvents();
+                    assertEquals(1, events.size());
+                    assertTrue(events.get(0) instanceof BoardEvents.BoardCreated);
+                })
+                .Execute();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        PlainTextReport report = new PlainTextReport();
+        feature.accept(report);
+        System.out.println(report.toString());
+    }
+
+    private TestContext getContext() {
+        return TestContext.getInstance();
+    }
+
+    static class TestContext {
+        private static TestContext instance;
+        private GenericInMemoryRepository<Board, BoardId> boardRepository;
+        private MessageBus<DomainEvent> messageBus;
+        private List<DomainEvent> publishedEvents;
+
+        private TestContext() {
+            publishedEvents = new ArrayList<>();
+            messageBus = new BlockingMessageBus();
+            
+            messageBus.register(event -> {
+                if (event instanceof DomainEvent) {
+                    publishedEvents.add((DomainEvent) event);
+                }
+            });
+
+            boardRepository = new GenericInMemoryRepository<>(messageBus);
+        }
+
+        public static TestContext getInstance() {
+            if (instance == null) {
+                instance = new TestContext();
+            }
+            return instance;
+        }
+
+        public CreateBoardUseCase newCreateBoardUseCase() {
+            return new CreateBoardService(boardRepository);
+        }
+
+        public GenericInMemoryRepository<Board, BoardId> boardRepository() {
+            return boardRepository;
+        }
+
+        public List<DomainEvent> getPublishedEvents() {
+            return new ArrayList<>(publishedEvents);
+        }
+    }
+}
+```
+
+### Using Rules for Scenario Organization
+
+```java
+@EzFeature
+@EzFeatureReport
+public class CreatePlanUseCaseTest {
+
+    static String FEATURE_NAME = "Create Plan";
+    static Feature feature;
+    
+    // Define Rules
+    static final String SUCCESSFUL_CREATION_RULE = "Successful Plan Creation";
+    static final String INPUT_VALIDATION_RULE = "Input Validation";
+    static final String DUPLICATE_VALIDATION_RULE = "Duplicate Validation";
+
+    @BeforeAll
+    static void beforeAll() {
+        feature = Feature.New(FEATURE_NAME);
+        feature.initialize();
+        
+        feature.NewRule(SUCCESSFUL_CREATION_RULE);
+        feature.NewRule(INPUT_VALIDATION_RULE);
+        feature.NewRule(DUPLICATE_VALIDATION_RULE);
+    }
+
+    @EzScenario(rule = SUCCESSFUL_CREATION_RULE)
+    public void create_plan_successfully() {
+        feature.newScenario()
+                .Given("valid plan data", env -> {
+                    env.put("planId", UUID.randomUUID().toString());
+                    env.put("planName", "My Plan");
+                    env.put("userId", "user123");
+                })
+                .When("I create the plan", env -> {
+                    CreatePlanInput input = CreatePlanInput.create();
+                    input.id = env.gets("planId");
+                    input.name = env.gets("planName");
+                    input.userId = env.gets("userId");
+                    
+                    var output = createPlanUseCase.execute(input);
+                    env.put("output", output);
+                })
+                .ThenSuccess(env -> {
+                    var output = env.get("output", CqrsOutput.class);
+                    assertEquals(ExitCode.SUCCESS, output.getExitCode());
+                })
+                .Execute();
+    }
+
+    @EzScenario(rule = INPUT_VALIDATION_RULE)
+    public void reject_empty_plan_name() {
+        feature.newScenario()
+                .Given("a plan with empty name", env -> {
+                    env.put("planName", "");
+                })
+                .When("I try to create the plan", env -> {
+                    // Implementation
+                })
+                .ThenFailure(env -> {
+                    // Assertions for failure case
+                })
+                .Execute();
+    }
+
+    @EzScenario(rule = DUPLICATE_VALIDATION_RULE)
+    public void reject_duplicate_plan_id() {
+        feature.newScenario().withRule(DUPLICATE_VALIDATION_RULE)
+                .Given("an existing plan", env -> {
+                    // Setup existing plan
+                })
+                .When("I create a plan with same ID", env -> {
+                    // Try to create duplicate
+                })
+                .ThenFailure(env -> {
+                    // Verify rejection
+                })
+                .Execute();
+    }
+}
+```
+
+### Key Points for ezSpec
+
+- `static Feature feature` is a static data member
+- **Rules MUST be created after `feature.initialize()`**
+- Use `@EzScenario(rule = ruleName)` or `withRule(ruleName)` to assign scenarios
+- If no rule specified, scenarios归类到 default rule
+- `@EzFeatureReport` generates readable test reports
+
+---
+
+## Spec Organization Guide
+
+Organize specification files to reflect domain model Aggregate boundaries.
+
+### Directory Structure
+
+```
+.dev/specs/
+├── product/              # Product Aggregate
+│   ├── entity/          # Product domain model specs
+│   │   └── product-spec.md
+│   └── usecase/         # Product-related Use Cases
+│       ├── create-product.json
+│       └── set-product-goal.json
+│
+├── pbi/                  # ProductBacklogItem Aggregate
+│   ├── entity/
+│   │   └── pbi-spec.md
+│   └── usecase/
+│       ├── create-pbi.json
+│       └── estimate-pbi.json
+│
+├── sprint/               # Sprint Aggregate
+│   ├── entity/
+│   └── usecase/
+│       ├── create-sprint.json
+│       └── start-sprint.json
+│
+├── team/                 # Team Aggregate
+│   └── ...
+└── tag/                  # Tag Aggregate
+    └── ...
+```
+
+### Naming Conventions
+
+| Type | Format | Example |
+|------|--------|---------|
+| Use Case Spec | `[action]-[aggregate].json` | `create-product.json` |
+| Entity Spec | `[aggregate]-spec.md` | `product-spec.md` |
+
+### Determining Spec Location
+
+**Step 1**: Ask "Which Aggregate does this Use Case primarily operate on?"
+
+**Step 2**: Verify using Aggregate identification checklist
+
+**Step 3**: Place spec in the correct aggregate directory
+
+### Common Mistakes
+
+| Mistake | Why It's Wrong | Correct Location |
+|---------|---------------|------------------|
+| `product/usecase/create-pbi.json` | PBI is independent Aggregate | `pbi/usecase/create-pbi.json` |
+| `product/usecase/create-sprint.json` | Sprint is independent Aggregate | `sprint/usecase/create-sprint.json` |
+| `specs/usecases/create-product.json` | Loses Aggregate boundary visibility | `product/usecase/create-product.json` |
+
+### Migration Guide
+
+If specs are in wrong location:
+
+```bash
+# Step 1: Create correct directory structure
+mkdir -p .dev/specs/[aggregate]/usecase
+
+# Step 2: Move file
+mv .dev/specs/product/usecase/create-sprint.json \
+   .dev/specs/sprint/usecase/
+
+# Step 3: Update references
+# Update task-*.json spec.useCase paths
+# Update test file references
+# Update documentation links
+
+# Step 4: Validate
+grep -r "old/path" .  # Confirm no missing references
+```
+
+### Aggregate Reference Table
+
+| Aggregate | Spec Directory | Primary Use Cases |
+|-----------|---------------|-------------------|
+| Product | `product/` | CreateProduct, SetProductGoal |
+| ProductBacklogItem | `pbi/` | CreatePBI, EstimatePBI, AssignPBI |
+| Sprint | `sprint/` | CreateSprint, StartSprint, CloseSprint |
+| Team | `team/` | CreateTeam, AddMember, RemoveMember |
+| Tag | `tag/` | CreateTag, DeleteTag, AssignTag |
+
+---
+
+## Use Case Spec Template
+
+### Query Use Case Spec
+
+```json
+{
+  "query": "[QueryName]",
+  "behavior": "[描述查詢行為]",
+  "input": [
+    { "name": "[inputField]", "type": "[Type]", "note": "[說明]" }
+  ],
+  "method": "[projection].query",
+  "output": "[OutputType]",
+  "domainModelNotes": [
+    "[任何領域模型相關說明]"
+  ],
+  "dependencies": [
+    { "name": "[dependencyName]", "type": "[DependencyType]", "note": "[用途說明]" }
+  ],
+  "projections": [
+    {
+      "name": "[ProjectionName] extends Projection<[Input], [Output]>",
+      "description": "[Projection 用途說明]",
+      "location": "[aggregate].usecase.port.out.projection",
+      "implementation": "[aggregate].adapter.out.projection.Jpa[ProjectionName]",
+      "critical": true,
+      "input": [
+        { "name": "[inputField]", "type": "[Type]" }
+      ]
+    }
+  ],
+  "dataTransferObjects": [
+    {
+      "name": "[DtoName]",
+      "description": "[DTO 用途說明]",
+      "location": "[aggregate].usecase.port",
+      "fields": [
+        { "name": "[fieldName]", "type": "[Type]" }
+      ]
+    }
+  ],
+  "mappers": [
+    {
+      "name": "[MapperName]",
+      "description": "🚨 CRITICAL: Must be generated, handles Entity to DTO conversion",
+      "location": "[aggregate].usecase.port",
+      "critical": true,
+      "methods": [
+        "toDto([Entity] entity) -> [Dto]",
+        "toDomain([Dto] dto) -> [Entity] (if needed)"
+      ],
+      "note": "⚠️ Important: Mapper must be in usecase.port package, NOT in adapter!"
+    }
+  ],
+  "_implementation_checklist": {
+    "note": "Must complete all items during implementation",
+    "items": [
+      "✅ Query UseCase Interface (with Input/Output inner classes)",
+      "✅ Query Service Implementation (in usecase.service package)",
+      "✅ All DTOs listed in dataTransferObjects",
+      "✅ All Mappers listed in mappers section (CRITICAL!)",
+      "✅ Projection Interface (in usecase.port.out.projection)",
+      "✅ Projection JPA Implementation (in adapter.out.projection)",
+      "✅ BDD Tests"
+    ]
+  }
+}
+```
+
+---
+
+## Ubiquitous Language in Requirements Modeling
+
+### The Challenge of Domain Concepts
+
+**Scrum Core Artifacts困境**:
+- Product Backlog is one of three core Scrum artifacts
+- Product Owner manages Product Backlog as primary responsibility
+- DDD modeling dilemma:
+  1. As Entity/Value Object → Over-design, doesn't need ID
+  2. As Query → Domain model missing core concept
+
+### Solution: Domain Service as First-Class Citizen
+
+```java
+// Product Backlog as Domain Service (first-class citizen)
+@DomainService
+public class ProductBacklog {
+    private final BacklogItemRepository repository;
+    
+    // Product Backlog's core responsibility: maintain priority ordering
+    public void reorder(ProductId productId, List<BacklogItemId> newOrder) {
+        // This is Product Backlog's core business logic!
+        List<BacklogItem> items = repository.findByProductId(productId);
+        
+        // Business rule: Only READY items can be at top
+        validateOrderingRules(items, newOrder);
+        
+        for (int i = 0; i < newOrder.size(); i++) {
+            BacklogItem item = findById(items, newOrder.get(i));
+            item.updateOrder(i);
+            repository.save(item);
+        }
+        
+        publishEvent(new ProductBacklogReordered(productId, newOrder));
+    }
+    
+    // Product Backlog's business rules
+    public void prepareForSprintPlanning(ProductId productId) {
+        List<BacklogItem> items = getTopItems(productId, 10);
+        
+        // Business rule: Before Sprint Planning, top 10 items must be READY
+        for (BacklogItem item : items) {
+            if (!item.isReady()) {
+                throw new NotReadyForSprintException(
+                    "Top items must be READY before Sprint Planning"
+                );
+            }
+        }
+    }
+    
+    // Product Backlog queries (still domain concept)
+    public List<BacklogItem> getRefinementCandidates(ProductId productId) {
+        return repository.findByProductId(productId).stream()
+            .filter(item -> item.needsRefinement())
+            .limit(5)
+            .toList();
+    }
+}
+```
+
+### Benefits of This Design
+
+1. **Complete Ubiquitous Language**: Product Backlog is first-class domain citizen
+2. **Clear Responsibilities**: Encapsulates Product Backlog-specific business rules
+3. **No Over-Design**: No forced ID or Entity pattern
+
+### Complete Domain Model Design
+
+**1. Product Aggregate (the product itself)**
+```java
+@AggregateRoot
+public class Product {
+    private ProductId productId;
+    private ProductName name;
+    private ProductVision vision;
+    private ProductGoal currentGoal;
+    private ProductOwnerId productOwnerId;
+    
+    // Product's responsibility: manage product-level concepts
+    public void setProductGoal(ProductGoal goal) {
+        this.currentGoal = goal;
+        publishEvent(new ProductGoalSet(productId, goal));
+    }
+    
+    // Note: Doesn't directly manage Backlog Items
+}
+```
+
+**2. BacklogItem Aggregate (individual items)**
+
+The key insight is that Product Backlog should be modeled as a Domain Service rather than an Entity, because:
+- It represents a collection/ordering concept, not an object with identity
+- It encapsulates specific business rules (ordering, ready state validation)
+- It avoids over-designing with unnecessary IDs
+
+This approach maintains the integrity of the Ubiquitous Language while keeping the domain model clean and purposeful.

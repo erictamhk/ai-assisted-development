@@ -577,3 +577,179 @@ Create channels for capturing prompt improvement opportunities. When agents make
 4. "Chain-of-Thought Prompting" - https://arxiv.org/abs/2201.11903
 5. "Self-Consistency Improves Chain-of-Thought Reasoning" - https://arxiv.org/abs/2203.11171
 6. "WizardLM: Empowering Large Language Models" - https://arxiv.org/abs/2304.12244
+7. doc/agents-md-cli-ai-agent-tools.md - CLI AI Agent Tools
+8. doc/on-demand-rule-loading.md - On-Demand Rule Loading
+9. ref/engineering/context_engineering/CAAP.md - Context Engineering patterns
+
+---
+
+## Appendix: AGENTS.md Template Library
+
+### Minimal AGENTS.md Template
+
+```markdown
+# Project Name
+
+Brief description of what this project does.
+
+## Tech Stack
+- [Language/Framework 1]
+- [Language/Framework 2]
+- [Database/Storage]
+
+## Quick Commands
+- `npm install` - Install dependencies
+- `npm test` - Run tests
+- `npm run build` - Build for production
+
+## Code Standards
+- Follow existing code patterns
+- Add tests for new functionality
+- Run linting before committing
+
+## Project Structure
+```
+src/
+  ├── domain/     # Business logic
+  ├── application/ # Use cases
+  └── infrastructure/ # External systems
+```
+```
+
+### Comprehensive AGENTS.md Template
+
+```markdown
+# [Project Name]
+
+A [type] application built with [tech stack].
+
+## Overview
+
+- **Purpose**: [What problem does this solve?]
+- **Architecture**: [Clean Architecture/DDD/Microservices]
+- **Environment**: [Development/Production]
+
+## Development Setup
+
+### Prerequisites
+- [Tool 1] version X+
+- [Tool 2] version X+
+
+### Getting Started
+```bash
+[command 1]
+[command 2]
+```
+
+### Testing
+```bash
+[test command]       # All tests
+[unit test command]  # Unit tests only
+[integration command] # Integration tests
+```
+
+## Code Standards
+
+### Language Conventions
+- Use [patterns, e.g., "functional programming"]
+- Prefer [principles, e.g., "immutability"]
+- TypeScript/JavaScript: strict mode enabled
+
+### Naming Conventions
+- Variables/functions: [convention, e.g., camelCase]
+- Classes/components: [convention, e.g., PascalCase]
+- Constants: [convention, e.g., UPPER_SNAKE_CASE]
+
+### File Organization
+```
+src/
+  ├── [layer 1]/   # e.g., domain
+  ├── [layer 2]/   # e.g., application
+  └── [layer 3]/   # e.g., infrastructure
+```
+
+## Testing Requirements
+
+- Minimum [X]% coverage on new code
+- Unit tests for business logic
+- Integration tests for API endpoints
+
+## Security Guidelines
+
+- Never commit secrets or .env files
+- Use environment variables for sensitive data
+- [Project-specific security rules]
+
+## Code Review
+
+- All changes require [number] reviewer(s)
+- [Special review requirements, e.g., "Security review for auth changes"]
+- Run [linting/testing] before requesting review
+
+## Last Updated
+- 2024-12-31
+```
+
+### Monorepo AGENTS.md Template
+
+```markdown
+# Monorepo Root AGENTS.md
+
+This is a monorepo containing multiple packages.
+
+## Quick Reference
+- Package manager: [pnpm/npm/yarn]
+- Test command: [command]
+- Build command: [command]
+
+## Package Structure
+- `packages/api/` - Backend API service
+- `packages/web/` - Frontend application
+- `packages/shared/` - Shared utilities
+
+## Common Commands
+```bash
+[install all]        # Install all dependencies
+[test all]          # Run all tests
+[build all]         # Build all packages
+```
+
+## See Also
+- `/packages/api/AGENTS.md` - Backend-specific rules
+- `/packages/web/AGENTS.md` - Frontend-specific rules
+```
+
+---
+
+## Appendix: Prompt Engineering Checklist
+
+When creating or reviewing prompts for AI agents, use this checklist:
+
+### Prompt Structure
+- [ ] Clear role definition
+- [ ] Explicit context provided
+- [ ] Constraints listed
+- [ ] Examples included (where helpful)
+- [ ] Output format specified
+- [ ] Success criteria defined
+
+### Context Management
+- [ ] Relevant information included
+- [ ] Irrelevant information excluded
+- [ ] Priority given to critical rules
+- [ ] On-demand loading configured for large projects
+- [ ] Cross-references to documentation
+
+### Clarity and Specificity
+- [ ] Ambiguous terms defined
+- [ ] Technical jargon explained
+- [ ] "Why" behind rules included
+- [ ] Concrete examples provided
+- [ ] Edge cases addressed
+
+### Testing and Validation
+- [ ] Prompt tested with common scenarios
+- [ ] Edge cases verified
+- [ ] Feedback loop established
+- [ ] Version tracking implemented
+- [ ] Review process defined

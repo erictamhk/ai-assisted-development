@@ -281,3 +281,405 @@ When working with AI assistants, structure requirements clearly:
 - IEEE 830-2014 - Recommended Practice for Software Requirements Specifications
 - ATAM (Architecture Tradeoff Analysis Method)
 - INVEST principles for user stories
+
+---
+
+## Requirements Template from Reference Projects
+
+### Functional Requirements Structure
+
+```markdown
+# [Project Name] Requirements
+
+## Project Overview
+
+[Brief description of what the application does]
+
+## Functional Requirements
+
+### Command Summary (for CLI applications)
+- `command1` - Description of what it does
+- `command2` - Description of what it does
+
+### [Module/Subsystem 1]
+
+#### [Function 1.1]
+- Description of the function
+- Input parameters and validation rules
+- Expected output
+- Error conditions and messages
+
+#### [Function 1.2]
+- [Same structure]
+
+### [Module/Subsystem 2]
+
+[Same structure]
+
+### Error Handling
+
+- Invalid commands show appropriate error messages
+- Non-existing resources trigger specific error messages
+- Empty inputs are validated and rejected
+- Duplicate entries are prevented with clear error messages
+```
+
+### Non-Functional Requirements Structure
+
+```markdown
+## Non-Functional Requirements
+
+### 1. Architecture
+
+#### [Architecture Pattern] Compliance
+- Clear separation between layers:
+    - [Layer 1]: [Description]
+    - [Layer 2]: [Description]
+    - [Layer 3]: [Description]
+
+#### Domain-Driven Design
+- Use of [Aggregate Roots]
+- Value Objects for [identities and domain concepts]
+- Immutable entities where appropriate
+- Read-only wrappers for external access
+
+### 2. Technology Stack
+
+- **Language**: [Version]
+- **Build Tool**: [Name]
+- **Testing**: [Framework]
+- **Web Framework**: [Name] (if applicable)
+- **Database**: [Type] (for production)
+- **Support Libraries**: [List]
+
+### 3. Interface Requirements
+
+#### CLI Interface
+- Command-line based interaction
+- Commands format: `command <parameters>`
+- Real-time feedback for all operations
+
+#### Web Interface (if applicable)
+- RESTful API endpoints
+- JSON request/response format
+- Authentication mechanism
+
+### 4. Code Quality
+
+- Comprehensive unit test coverage
+- Integration tests for major workflows
+- Clear separation of concerns
+- SOLID principles adherence
+- Minimal code duplication
+
+### 5. Performance
+
+- Efficient [operations]
+- Scalable [patterns] for future enhancement
+- Lightweight [application] startup
+
+## System Constraints
+
+1. [Constraint 1]
+2. [Constraint 2]
+3. [Constraint 3]
+
+## Future Considerations
+
+1. [Feature 1]
+2. [Feature 2]
+3. [Feature 3]
+```
+
+---
+
+## Spec Parsing Template for AI Assistants
+
+When given a spec file, AI assistants should follow this parsing procedure:
+
+### Step 1: Extract ALL Components
+
+```markdown
+## Components to Implement from Spec
+
+### 1. Use Cases
+- [ ] List all use cases mentioned
+
+### 2. Services
+- [ ] List all services needed
+
+### 3. DTOs (Data Transfer Objects)
+- [ ] List each DTO from spec
+
+### 4. Projections
+- [ ] List projection interfaces
+- [ ] List projection implementations
+
+### 5. Mappers (🚨 CRITICAL - OFTEN MISSED!)
+- [ ] **MUST CHECK**: Does spec have a "mappers" section?
+- [ ] List all mappers from spec
+- [ ] Note package location: `[aggregate].usecase.port` (NOT adapter!)
+- [ ] Note: Mappers convert between entities and DTOs
+- [ ] **WARNING**: If spec says "must be generated" or "critical": true, this is MANDATORY!
+
+### 6. Repositories
+- [ ] List any custom repositories
+
+### 7. Tests
+- [ ] List required test files
+```
+
+### Step 2: Create Implementation Order
+
+1. Domain entities/value objects (if needed)
+2. **Mappers** (do NOT skip!)
+3. DTOs
+4. Use Case interfaces
+5. Projections (interface then implementation)
+6. Services
+7. Tests
+
+### Step 3: Validation Checklist
+
+Before marking task complete:
+- [ ] All DTOs from spec created?
+- [ ] All Mappers from spec created?
+- [ ] All Projections created (both interface AND implementation)?
+- [ ] Mapper is injected and used in Projection?
+- [ ] All tests passing?
+
+### Common Mistakes to Avoid
+
+1. ❌ Implementing DTO conversion directly in Projection instead of using Mapper
+2. ❌ Forgetting to create Mapper when spec mentions it
+3. ❌ Creating only Projection interface without implementation
+4. ❌ Missing DTOs mentioned in spec
+
+### Example Spec Analysis
+
+Given a spec with:
+```json
+{
+  "mappers": [
+    {"name": "ProductMapper", "description": "..."}
+  ],
+  "projections": [...],
+  "dataTransferObjects": [...]
+}
+```
+
+MUST create:
+1. ✅ ProductMapper class
+2. ✅ Use ProductMapper in Projection implementation
+3. ✅ All DTOs listed
+4. ✅ Both Projection interface AND implementation
+
+---
+
+## Complex Aggregate Specification Template
+
+Use this template for specifying complex aggregates with multiple entities.
+
+### 1. Aggregate Overview
+
+```yaml
+aggregate:
+  name: [AggregateRootName]
+  description: [Business purpose and responsibility]
+  bounded_context: [Context name]
+  invariants:
+    - [Business rule 1 that must always be true]
+    - [Business rule 2 that must always be true]
+```
+
+### 2. Entity Hierarchy
+
+```yaml
+entities:
+  root:
+    name: [AggregateRootName]
+    id_type: [IdType]
+    properties:
+      - name: [propertyName]
+        type: [type]
+        description: [purpose]
+        constraints: [validation rules]
+    
+  children:
+    - name: [EntityName]
+      parent: [ParentEntityName]
+      id_type: [IdType or embedded]
+      cardinality: [one-to-one | one-to-many]
+      properties:
+        - name: [propertyName]
+          type: [type]
+          description: [purpose]
+      invariants:
+        - [Entity-specific business rules]
+```
+
+### 3. Value Objects
+
+```yaml
+value_objects:
+  - name: [ValueObjectName]
+    properties:
+      - name: [propertyName]
+        type: [type]
+        validation: [rules]
+    used_by: [List of entities using this VO]
+```
+
+### 4. Domain Events
+
+```yaml
+domain_events:
+  - name: [EventName]
+    trigger: [What action causes this event]
+    properties:
+      - name: [propertyName]
+        type: [type]
+        source: [Where value comes from]
+```
+
+### 5. Commands and Business Operations
+
+```yaml
+commands:
+  - name: [CommandName]
+    description: [What this command does]
+    parameters:
+      - name: [paramName]
+        type: [type]
+        required: [true/false]
+    validations:
+      - [Validation rule]
+    side_effects:
+      - [What happens as result]
+    events: [List of events emitted]
+```
+
+### 6. Aggregate Relationships
+
+```yaml
+relationships:
+  - type: [association | composition | aggregation]
+    from: [EntityName]
+    to: [EntityName]
+    cardinality: [1..1 | 1..* | 0..* | etc]
+    navigation: [unidirectional | bidirectional]
+    cascade: [operations that cascade]
+```
+
+### Example: Workflow Aggregate with Lanes
+
+```yaml
+aggregate:
+  name: Workflow
+  description: Represents a workflow board with stages and swimlanes
+  bounded_context: Workflow Management
+  invariants:
+    - A workflow must have at least one stage
+    - Stage order must be unique within a workflow
+    - Swimlane names must be unique within a workflow
+
+entities:
+  root:
+    name: Workflow
+    id_type: WorkflowId
+    properties:
+      - name: boardId
+        type: String
+        description: Reference to the board
+        constraints: not null
+      - name: name
+        type: String
+        description: Display name
+        constraints: not blank, max 100 chars
+      - name: lanes
+        type: List<Lane>
+        description: Collection of stages and swimlanes
+        constraints: not empty
+    
+  children:
+    - name: Lane
+      parent: Workflow
+      id_type: embedded
+      cardinality: one-to-many
+      properties:
+        - name: laneId
+          type: String
+        - name: type
+          type: LaneType (enum: STAGE, SWIMLANE)
+        - name: name
+          type: String
+      invariants:
+        - Lane IDs must be unique within workflow
+        
+    - name: Stage
+      parent: Lane (inheritance)
+      properties:
+        - name: order
+          type: int
+          description: Position in workflow (0-based)
+          constraints: >= 0, unique within workflow
+        - name: wipLimit
+          type: Integer (optional)
+          description: Work in progress limit
+      invariants:
+        - Stages must have sequential order without gaps
+
+value_objects:
+  - name: LaneType
+    properties:
+      - name: value
+        type: String enum (STAGE, SWIMLANE)
+    used_by: [Lane]
+
+domain_events:
+  - name: WorkflowCreated
+    trigger: Create workflow command
+    properties:
+      - name: workflowId
+        type: String
+      - name: name
+        type: String
+
+commands:
+  - name: CreateWorkflow
+    description: Creates a new workflow
+    parameters:
+      - name: boardId
+        type: String
+        required: true
+      - name: name
+        type: String
+        required: true
+    validations:
+      - Name must not be blank
+    events: [WorkflowCreated]
+```
+
+### Tips for AI Communication with Complex Specifications
+
+1. **Start with the Big Picture**: Describe the business purpose before diving into technical details
+
+2. **Use Concrete Examples**:
+   ```
+   "A Workflow contains multiple Lanes. A Lane can be either a Stage (horizontal) or Swimlane (vertical). For example: 'To Do', 'In Progress', 'Done' are Stages."
+   ```
+
+3. **Specify Constraints Clearly**:
+   ```
+   "Stages must maintain sequential order (0, 1, 2...) with no gaps. When a stage is removed, subsequent stages must be reordered."
+   ```
+
+4. **Define Business Rules**:
+   ```
+   "A card can be in exactly one stage and optionally one swimlane at any time."
+   ```
+
+5. **Clarify Relationships**:
+   ```
+   "Workflow OWNS Lanes (composition) - deleting a workflow deletes all its lanes. Workflow REFERENCES Board (association) - deleting a board doesn't automatically delete workflows."
+   ```

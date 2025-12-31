@@ -255,6 +255,137 @@ flowchart TD
         ├─────────────┤
        │ Integration  │   ← Moderate (API, Database, Events)
        │    Tests     │
+       ├─────────────┐
+      │   Unit Tests  │   ← Maximum (Domain logic, Use cases)
+      │  (ezSpec BDD) │
+      └─────────────┘
+```
+
+### Test Generation Patterns
+
+```typescript
+// ✅ GOOD - BDD-style test structure
+@EzFeature
+class CreateProductUseCaseTest {
+    static Feature feature = Feature.New("Create Product Use Case");
+    
+    @EzScenario
+    public void should_create_product_with_valid_input() {
+        feature.newScenario("Successfully create a product with valid input")
+            .Given("valid product creation input", env -> {
+                var input = CreateProductInput.create();
+                input.productId = "prod-001";
+                input.name = "Test Product";
+                input.userId = "user-001";
+                env.put("input", input);
+            })
+            .When("the use case is executed", env -> {
+                var input = env.get("input", CreateProductInput.class);
+                var output = useCase.execute(input);
+                env.put("output", output);
+            })
+            .Then("the product should be created successfully", env -> {
+                var output = env.get("output", CqrsOutput.class);
+                assertThat(output.isSuccessful()).isTrue();
+            })
+            .Execute();
+    }
+}
+```
+
+---
+
+## AI Coding Patterns Reference
+
+### Pattern Categories
+
+| Category | Patterns | Description |
+|----------|----------|-------------|
+| **Use Case** | Command, Query, Reactor | Business operation patterns |
+| **Aggregate** | Event Sourcing, State-based | Domain entity patterns |
+| **Repository** | InMemory, Outbox, EventStore | Data access patterns |
+| **Adapter** | REST API, Message Handler | Integration patterns |
+| **Testing** | ezSpec, Unit, Integration | Test structure patterns |
+
+### Pattern Selection Guide
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    PATTERN SELECTION DECISION TREE                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  What type of operation?                                                │
+│         │                                                               │
+│         ├─── Write Operation ───► Command Use Case                      │
+│         │                                                               │
+│         ├─── Read Operation ───► Query Use Case                         │
+│         │                                                               │
+│         └─── Event Handling ───► Reactor Pattern                        │
+│                                                                         │
+│  What domain pattern?                                                   │
+│         │                                                               │
+│         ├─── Persistent Aggregate ───► Event Sourcing                   │
+│         │                                                               │
+│         ├─── Simple Entity ───► State-based Aggregate                   │
+│         │                                                               │
+│         └─── Transient Data ───► Value Object                           │
+│                                                                         │
+│  What data access pattern?                                              │
+│         │                                                               │
+│         ├─── In-memory Storage ───► GenericInMemoryRepository           │
+│         │                                                               │
+│         ├─── Outbox Pattern ───► Outbox Repository                      │
+│         │                                                               │
+│         └─── Event Sourcing ───► EventStore Repository                  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Common AI Mistakes and Corrections
+
+### File Structure Mistakes
+
+| Mistake | Correction | Severity |
+|---------|------------|----------|
+| Separate Input.java file | Use inner class | Critical |
+| Separate Output.java file | Use inner class | Critical |
+| Package mismatch | Match layer structure | High |
+| Wrong annotation | Use framework conventions | Medium |
+
+### Repository Mistakes
+
+| Mistake | Correction | Severity |
+|---------|------------|----------|
+| Custom repository methods | Use framework methods only | High |
+| Repository interface in impl | Interface in domain, impl in infra | Critical |
+| No generic type parameters | Use Repository<T, ID> | Medium |
+
+### Domain Pattern Mistakes
+
+| Mistake | Correction | Severity |
+|---------|------------|----------|
+| Mutable value objects | Make immutable | High |
+| instanceof chains | Use pattern matching | Medium |
+| Primitive obsession | Use value objects | Medium |
+| Missing aggregate invariants | Enforce in aggregate root | Critical |
+
+---
+
+## References
+
+1. doc/agents-md-cli-ai-agent-tools.md - CLI AI Agent Tools
+2. doc/prompt-engineering-ai-agents.md - Prompt Engineering Guide
+3. doc/on-demand-rule-loading.md - On-Demand Rule Loading
+4. ref/ai-coding-exercise-analysis.md - AI Coding Exercise Analysis
+5. ref/engineering/context_engineering/CAAP.md - Context Engineering
+6. ref/engineering/METHODOLOGIES.md - Development Methodologies
+        ┌─────────────┐
+        │   E2E Tests │    ← Minimum (Critical user flows only)
+        ├─────────────┤
+       │ Integration  │   ← Moderate (API, Database, Events)
+       │    Tests     │
        ├─────────────┤
       │   Unit Tests  │   ← Maximum (Domain logic, Use cases)
       │  (ezSpec BDD) │

@@ -954,6 +954,138 @@ The Classic approach emphasizes:
 - Growing the design incrementally
 - Trusting in-state verification
 
+### 7. Triangulation Strategy
+When implementing a new feature, write multiple tests with different inputs to verify the implementation:
+
+```typescript
+describe('calculateDiscount', () => {
+  it('should return 0 for orders under $100', () => {
+    expect(calculateDiscount(50)).toBe(0);
+  });
+
+  it('should return 10% for orders $100-499', () => {
+    expect(calculateDiscount(100)).toBe(10);
+    expect(calculateDiscount(250)).toBe(25);
+  });
+
+  it('should return 20% for orders $500+', () => {
+    expect(calculateDiscount(500)).toBe(100);
+    expect(calculateDiscount(1000)).toBe(200);
+  });
+});
+```
+
+---
+
+## TDD Conventions and Standards
+
+### Test Structure (from Project Constitution)
+
+```java
+// Arrange-Act-Assert Pattern
+@Test
+void should_add_a_project_with_duplicated_name_has_no_effect() {
+    // Arrange
+    Project project = new Project("Test Project");
+    ProjectRepository repository = new InMemoryProjectRepository();
+    AddProjectService service = new AddProjectService(repository);
+
+    // Act
+    service.execute(new AddProjectInput("Test Project"));
+
+    // Assert
+    assertThat(repository.count()).isEqualTo(0);
+}
+```
+
+### Input/Output Pattern for Tests
+
+```typescript
+// Input as inner class in UseCase
+interface CreateProductUseCase {
+    class CreateProductInput implements Input {
+        public String productId;
+        public String name;
+        public String userId;
+    }
+
+    class CreateProductOutput implements Output {
+        public ExitCode exitCode;
+        public String message;
+        public ProductDto product;
+    }
+
+    CqrsOutput execute(CreateProductInput input);
+}
+```
+
+### Repository Pattern for Testing
+
+```java
+// Use in-memory repositories for fast tests
+public class InMemoryProjectRepository implements Repository<Project, ProjectId> {
+    private final Map<ProjectId, Project> storage = new HashMap<>();
+
+    @Override
+    public Optional<Project> findById(ProjectId id) {
+        return Optional.ofNullable(storage.get(id));
+    }
+
+    @Override
+    public void save(Project aggregate) {
+        storage.put(aggregate.getId(), aggregate);
+    }
+
+    @Override
+    public void delete(Project aggregate) {
+        storage.remove(aggregate.getId());
+    }
+}
+```
+
+---
+
+## Advanced Testing Patterns
+
+### Isolation Paths by Code Type
+
+| Code Type | Testing Strategy | Mock Usage |
+|-----------|------------------|------------|
+| Pure functions | Direct testing | None needed |
+| Stateful objects | State transition tests | None |
+| Collaborative objects | Interaction tests | Mocks for boundaries |
+| Side effects | Contract tests | Mocks for external systems |
+
+### Test Data Builders
+
+```typescript
+class OrderBuilder {
+    private id = 'order-001';
+    private items: OrderItem[] = [];
+    private customerId = 'customer-001';
+
+    withId(id: string): OrderBuilder {
+        this.id = id;
+        return this;
+    }
+
+    withItems(items: OrderItem[]): OrderBuilder {
+        this.items = items;
+        return this;
+    }
+
+    build(): Order {
+        return new Order(this.id, this.items, this.customerId);
+    }
+}
+
+// Usage
+const order = new OrderBuilder()
+    .withId('order-123')
+    .withItems([{ productId: 'prod-1', quantity: 2 }])
+    .build();
+```
+
 ---
 
 ## Testing Pyramid and TDD
@@ -980,6 +1112,20 @@ The Classic approach emphasizes:
   └───────────────────────────────────────┘
 ```
 
+### TDD Foundation Principles
+
+1. **Unit tests form the base** - Fast, isolated tests that run frequently
+2. **Integration tests verify contracts** - Test component interactions
+3. **E2E tests validate flows** - Critical user scenarios only
+
+### Test Distribution Guidelines
+
+| Layer | Percentage | Characteristics |
+|-------|------------|-----------------|
+| Unit | 70-80% | Fast, isolated, many |
+| Integration | 15-20% | Moderate speed, component tests |
+| E2E | 5-10% | Slow, complete flows, few |
+
 ---
 
 ## References and Further Reading
@@ -990,3 +1136,4 @@ The Classic approach emphasizes:
 4. Beck, Kent. "Transformation Priority Premise." TDD Blog, 2011.
 5. Meszaros, Gerard. "xUnit Test Patterns: Refactoring Test Code." Addison-Wesley, 2007.
 6. "The Three Styles of Test-Driven Development." Google Testing Blog, 2020.
+7. AI Coding Exercise Repository - TDD and Testing Patterns (internal reference)

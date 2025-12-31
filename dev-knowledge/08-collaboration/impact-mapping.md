@@ -570,6 +570,136 @@ Generate human-readable impact map documentation from structured data for stakeh
 
 ---
 
+## Impact Mapping and Strategic Planning
+
+Impact Mapping is a strategic planning technique that bridges the gap between business objectives and software deliverables. It helps teams answer the fundamental question: "Why are we building this?" by creating a traceable connection from organizational goals to specific features.
+
+### Strategic Value Chain
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                   IMPACT MAPPING VALUE CHAIN                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│    ┌─────────────┐     ┌─────────────┐     ┌─────────────┐              │
+│    │   BUSINESS  │────►│    PROJECT  │────►│   PRODUCT   │              │
+│    │   STRATEGY  │     │   SCOPE     │     │   BACKLOG   │              │
+│    └─────────────┘     └─────────────┘     └─────────────┘              │
+│          │                   │                   │                      │
+│          │                   │                   │                      │
+│          ▼                   ▼                   ▼                      │
+│    ┌─────────────┐     ┌─────────────┐     ┌─────────────┐              │
+│    │   Mission   │     │  Features   │     │   User      │              │
+│    │   Vision    │     │  & Stories  │     │   Stories   │              │
+│    └─────────────┘     └─────────────┘     └─────────────┘              │
+│                                                                         │
+│    "Where do we    "What should we     "What exactly                    │
+│     want to be?"    build?"             to build?"                      │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Impact Mapping vs. Traditional Planning
+
+| Aspect | Traditional Planning | Impact Mapping |
+|--------|---------------------|----------------|
+| Starting Point | List of features | Business goals |
+| Focus | What to build | Why we're building it |
+| Traceability | Weak or none | Strong goal-to-deliverable trace |
+| Stakeholder Alignment | Often unclear | Explicit through impact chain |
+| Scope Control | Feature creep common | Goal-focused prioritization |
+| Validation | Delayed until delivery | Continuous through impact chain |
+
+### Impact Mapping in Agile Context
+
+Impact Mapping complements Agile methodologies by providing strategic alignment:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                 IMPACT MAPPING IN AGILE CYCLE                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                │
+│  │    RELEASE  │────►│   SPRINT    │────►│  INCREMENT  │                │
+│  │  PLANNING   │     │   PLANNING  │     │  REVIEW     │                │
+│  └─────────────┘     └─────────────┘     └─────────────┘                │
+│        │                   │                   │                        │
+│        │                   │                   │                        │
+│        ▼                   ▼                   ▼                        │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                │
+│  │   Impact    │     │  Sprint     │     │  Validate   │                │
+│  │   Map       │     │  Backlog    │     │  Impacts    │                │
+│  └─────────────┘     └─────────────┘     └─────────────┘                │
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │  Continuous Alignment Check: Does each increment contribute     │    │
+│  │  to business goals through the impact chain?                    │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Collaboration Best Practices
+
+### 1. Workshop-Based Approach
+
+Impact Mapping is most effective as a collaborative workshop activity:
+
+- **Duration**: 2-4 hours for initial impact map
+- **Participants**: Product owner, key stakeholders, technical lead
+- **Facilitation**: Skilled facilitator to guide exploration
+- **Output**: Shared understanding and documented impact map
+
+### 2. Start with Goals, Not Features
+
+The most common mistake is starting with a feature list. Impact Mapping requires starting with business goals:
+
+```
+❌ WRONG: "We need a shopping cart"
+         ↓
+         "Why?"
+         ↓
+         "Users need to buy things"
+         ↓
+         "That's not a goal, that's a feature"
+
+✅ CORRECT: "We want to increase revenue by 20%"
+           ↓
+           "Who can help achieve this?"
+           ↓
+           "Existing customers making larger purchases"
+           ↓
+           "How can they help?"
+           ↓
+           "Add items to cart before checkout"
+           ↓
+           "What do we need to build?"
+           ↓
+           "Shopping cart functionality"
+```
+
+### 3. Validate Impact Assumptions
+
+Every impact should be validated:
+
+- **Question**: "How will this actor change their behavior?"
+- **Evidence**: What data supports this assumption?
+- **Risk**: What if we're wrong about this impact?
+- **Experiment**: How can we test this impact hypothesis?
+
+### 4. Keep the Map Alive
+
+Impact maps are living documents:
+
+- **Update**: As goals change, update the impact map
+- **Review**: Regularly validate impacts against outcomes
+- **Prune**: Remove impacts that no longer align with goals
+- **Extend**: Add new goals, actors, and impacts as needed
+
+---
+
 ## References and Further Reading
 
 1. Adzic, Gojko. "Impact Mapping: Delivering Business Value." 2012.
@@ -577,3 +707,6 @@ Generate human-readable impact map documentation from structured data for stakeh
 3. "Impact Mapping Workshop Guide." Gojko Adzic.
 4. "Strategic Planning with Impact Mapping." Agile Alliance.
 5. "From Goals to Delivered Features: Impact Mapping in Practice." NDC Conferences.
+6. ref/engineering/behavior_driven/BEHAVIOR_DRIVEN_DEVELOPMENT.md - BDD methodology
+7. doc/requirements-and-specification.md - Requirements and specification guide
+8. doc/behavior-driven-development.md - BDD comprehensive guide

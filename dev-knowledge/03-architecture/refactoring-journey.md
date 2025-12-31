@@ -503,3 +503,52 @@ ConsoleControllerExecutor → Request/Response → ConsoleController (in) → Us
 
 - Original repository: `refactor-to-ca` (14 git branches: main, step1-step14)
 - Related documentation: Clean Architecture, Domain-Driven Design, Test-Driven Development
+
+---
+
+## Architecture Patterns Quick Reference
+
+| Pattern | When to Use | Key Benefit |
+|---------|-------------|-------------|
+| **Layered Architecture** | Small-medium applications | Clear separation by technical concern |
+| **Ports & Adapters** | Framework-independent design | Technology independence |
+| **Clean Architecture** | Enterprise applications | Business logic isolation |
+| **Vertical Slice** | Large, feature-rich apps | Feature isolation and team scaling |
+| **Aggregate Root** | Domain-driven systems | Consistency boundary enforcement |
+| **CQRS** | Read/Write separation | Scalability and flexibility |
+| **Repository Pattern** | Data access abstraction | Persistence technology independence |
+| **Dependency Injection** | All architectures | Loose coupling and testability |
+
+---
+
+## Architecture Decision Checklist
+
+### Layer Compliance
+- [ ] Domain layer has no dependencies on outer layers
+- [ ] Application layer depends only on domain and ports
+- [ ] Adapter layer implements ports defined in inner layers
+- [ ] No framework dependencies in domain layer
+
+### Dependency Direction
+- [ ] All source code dependencies point inward
+- [ ] Ports defined in inner layers, implemented in outer
+- [ ] No circular dependencies between layers
+- [ ] No adapter-to-adapter direct dependencies
+
+### Code Organization
+- [ ] Related code co-located (feature slice or layer)
+- [ ] Clear boundaries between features/layers
+- [ ] Cross-cutting concerns in shared/ folder
+- [ ] No feature-specific code in shared/
+
+### Design Patterns
+- [ ] Entities contain behavior (not anemic)
+- [ ] Value objects are immutable and self-validating
+- [ ] Use cases follow Command/Query separation
+- [ ] Repositories are abstractions, not implementations
+
+### Testing
+- [ ] Domain logic tested without external dependencies
+- [ ] Use cases tested with mock ports
+- [ ] Adapters tested with real external systems
+- [ ] Integration tests verify layer interactions

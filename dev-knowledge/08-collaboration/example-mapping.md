@@ -589,6 +589,99 @@ Ask AI to ensure consistent terminology and structure across all rules and examp
 
 ---
 
+## Example Mapping in BDD Context
+
+Example Mapping is a core practice in Behavior-Driven Development (BDD) that helps teams translate user stories into executable specifications. The connection between Example Mapping and BDD is direct: examples discovered during Example Mapping sessions become the Gherkin scenarios that drive BDD tests.
+
+### Mapping Examples to Gherkin
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    EXAMPLE TO GHERKIN MAPPING                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐               │
+│  │    RULE     │────►│    GIVEN    │────►│  Background │               │
+│  │   CARD      │     │             │     │   SECTION   │               │
+│  └─────────────┘     └─────────────┘     └─────────────┘               │
+│                                                                         │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐               │
+│  │   EXAMPLE   │────►│ WHEN / THEN │────►│ Scenario    │               │
+│  │   CARD      │     │             │     │   Outline   │               │
+│  └─────────────┘     └─────────────┘     └─────────────┘               │
+│                                                                         │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐               │
+│  │   DATA      │────►│    Examples │────►│   Data      │               │
+│  │   TABLE     │     │   TABLE     │     │   Table     │               │
+│  └─────────────┘     └─────────────┘     └─────────────┘               │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Example Mapping with BDD Framework
+
+```typescript
+// After Example Mapping, convert examples to BDD tests
+describe('User Registration Feature', () => {
+  
+  describe('Successful Registration', () => {
+    it('should register user with valid email and password', async () => {
+      // Example from Example Mapping session
+      const result = await registerUser({
+        email: 'newuser@example.com',
+        password: 'SecurePass123!',
+        name: 'John Doe'
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.user.email).toBe('newuser@example.com');
+    });
+  });
+
+  describe('Registration Validation', () => {
+    // Examples demonstrating validation rules
+    it.each([
+      { email: '', password: 'Valid123!', error: 'Email required' },
+      { email: 'invalid', password: 'Valid123!', error: 'Invalid email' },
+      { email: 'valid@example.com', password: 'short', error: 'Password too short' },
+    ])('should reject $error', async ({ email, password, error }) => {
+      const result = await registerUser({ email, password, name: 'Test' });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain(error);
+    });
+  });
+});
+```
+
+---
+
+## Collaboration Best Practices
+
+### 1. Include All Perspectives
+
+Example Mapping sessions should include:
+- **Product Owners/Business Analysts** - Clarify requirements and priorities
+- **Developers** - Identify technical constraints and implementation details
+- **Testers** - Uncover edge cases and validation scenarios
+- **Domain Experts** - Validate business rules and terminology
+
+### 2. Timebox Sessions
+
+Keep Example Mapping sessions focused:
+- **Duration**: 25-30 minutes per story
+- **Rules per session**: 3-5 rules maximum
+- **Examples per rule**: 3-5 positive examples, 2-3 negative examples
+
+### 3. Document Outcomes
+
+Always document the results of Example Mapping:
+- **Acceptance Criteria**: Derived directly from examples
+- **Known Edge Cases**: Explicitly documented
+- **Open Questions**: Tracked for follow-up
+- **Implementation Notes**: Technical insights captured
+
+---
+
 ## References and Further Reading
 
 1. Rose, Seb. "Introducing Example Mapping." Cucumber Blog, 2015.
@@ -596,3 +689,6 @@ Ask AI to ensure consistent terminology and structure across all rules and examp
 3. Wynne, Matt, and Aslak Hellesøy. "The Cucumber Book: Behaviour-Driven Development for Testers and Developers." Pragmatic Programmers, 2012.
 4. "Example Mapping Session Guide." Cucumber Ltd.
 5. "BDD and Example Mapping in Practice." Agile Testing Days Conference.
+6. ref/engineering/behavior_driven/BEHAVIOR_DRIVEN_DEVELOPMENT.md - BDD methodology
+7. ref/engineering/specification_by_example/SPECIFICATION_BY_EXAMPLE.md - Specification by Example
+8. doc/behavior-driven-development.md - BDD comprehensive guide
