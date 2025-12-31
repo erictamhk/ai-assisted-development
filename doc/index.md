@@ -16,7 +16,8 @@ A comprehensive documentation of modern software engineering concepts, methodolo
 
 ### Architecture & Code Quality
 - [Layered Architecture](layered-architecture.md) - Ports and Adapters / Clean Architecture principles
-- [Clean Code](clean-code.md) - Writing maintainable and expressive code
+- [Clean Architecture Refactoring Journey](clean-architecture-refactoring-journey.md) - 14-step proven refactoring journey from monolith to Clean Architecture
+- [Clean Code](clean-code.md) - Writing maintainable and expressive code (enhanced with AI coding anti-patterns)
 - [Vertical Slice Architecture](vertical-slice-architecture-megred.md) - Feature-based project organization
 
 ### Specification & Testing
@@ -32,7 +33,7 @@ A comprehensive documentation of modern software engineering concepts, methodolo
 ### Advanced Patterns
 - [Event Sourcing](event-sourcing.md) - Pattern for storing state changes
 - [CQRS](cqrs.md) - Command Query Responsibility Segregation
-- [Design Patterns](design-patterns.md) - Gang of Four patterns catalog
+- [Design Patterns](design-patterns.md) - Gang of Four patterns catalog (enhanced with Clean Architecture patterns)
 - [Pattern Language](pattern-language.md) - Christopher Alexander's pattern language concept
 
 ### Collaborative Planning
@@ -40,9 +41,10 @@ A comprehensive documentation of modern software engineering concepts, methodolo
 - [Example Mapping](example-mapping.md) - BDD example discovery technique
 
 ### Coding Standards
-- [Coding Conventions](coding-conventions.md) - Universal naming, organization, and style guidelines
+- [Coding Conventions](coding-conventions.md) - Universal naming, organization, and style guidelines (enhanced with AI-specific conventions)
 
 ### AI-Assisted Development
+- [AI Coding Patterns](ai-coding-patterns.md) - Pattern language for AI-assisted development with anti-patterns and specification-driven development
 - [AGENTS.md and CLI AI Agent Tools](agents-md-cli-ai-agent-tools.md) - The AGENTS.md standard and supporting tools
 - [Prompt Engineering for AI Agents](prompt-engineering-ai-agents.md) - Techniques for effective agent instructions
 - [AI Agent Limitations](ai-agent-limitations.md) - Why agents skip instructions and fundamental constraints

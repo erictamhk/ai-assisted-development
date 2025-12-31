@@ -1526,6 +1526,116 @@ football.play();
 
 ---
 
+## Clean Architecture Patterns
+
+### Input/Output Port Pattern
+
+The Input/Output Port pattern is central to Clean Architecture, defining the interface between use cases and the outside world:
+
+```typescript
+// Input Port: Defines what the use case accepts
+interface CreateProductUseCase extends Command<
+    CreateProductUseCase.CreateProductInput, 
+    CqrsOutput<ProductDto>
+> {
+    class CreateProductInput implements Input {
+        public productId: string;
+        public name: string;
+        public userId: string;
+    }
+}
+
+// Output Port: Maps domain objects to presentation
+interface ProductPresenter {
+    present(product: Product): ProductDto;
+}
+
+// Service Implementation: Orchestrates the use case
+class CreateProductService implements CreateProductUseCase {
+    constructor(
+        private repository: Repository<Product, ProductId>,
+        private messageBus: MessageBus
+    ) {}
+
+    async execute(input: CreateProductInput): Promise<CqrsOutput<ProductDto>> {
+        const product = new Product(
+            ProductId.valueOf(input.productId),
+            input.name,
+            UserId.valueOf(input.userId)
+        );
+
+        repository.save(product);
+        messageBus.publish(product.getUncommittedEvents());
+
+        return CqrsOutput.of(ProductMapper.toDto(product));
+    }
+}
+```
+
+### Command/Query Separation (CQS)
+
+Separate operations that change state from those that read state:
+
+```typescript
+// Command: Modifies state, returns CqrsOutput
+interface CreateProductUseCase extends Command<Input, CqrsOutput> {}
+
+// Query: Read-only, returns custom Output
+interface GetProductUseCase extends Query<Input, GetProductOutput> {
+    class GetProductOutput implements Output {
+        public exitCode: ExitCode;
+        public message: string;
+        public product: ProductDto;
+    }
+}
+```
+
+### Repository Pattern
+
+Abstracts data access behind a generic interface:
+
+```typescript
+// ✅ CORRECT: Generic Repository Usage
+// NO custom Repository interface needed
+Repository<Product, ProductId> repository;
+
+// Standard methods only
+repository.findById(ProductId id);  // Optional<Product>
+repository.save(Product aggregate); // void
+repository.delete(Product aggregate); // void
+```
+
+### Bridge Pattern
+
+Decouples abstraction from implementation for multiple repository types:
+
+```typescript
+// Abstraction
+interface ToDoListRepository {
+    findById(id: ToDoListId): Promise<ToDoList | null>;
+    save(aggregate: ToDoList): Promise<void>;
+}
+
+// Implementation 1: In-memory
+class ToDoListInMemoryRepository implements ToDoListRepository {
+    private store: Map<string, ToDoList> = new Map();
+    // ... implementations
+}
+
+// Implementation 2: JPA/Spring Data
+class ToDoListCrudRepository implements ToDoListRepository {
+    private crudRepository: SpringDataRepository;
+    // ... implementations
+}
+
+// Client uses abstraction, not concrete implementation
+class UseCase {
+    constructor(private repository: ToDoListRepository) {}
+}
+```
+
+---
+
 ## References and Further Reading
 
 1. Gamma, Erich, et al. "Design Patterns: Elements of Reusable Object-Oriented Software." Addison-Wesley, 1994.

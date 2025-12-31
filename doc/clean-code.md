@@ -489,8 +489,55 @@ class UserRepository implements Repository<User> {
 
 ## AI-Assisted Clean Code
 
-```markdown
-## AI Prompt for Clean Code Refactoring
+### Common AI Coding Anti-Patterns
+
+Based on analysis of AI-generated code patterns, these anti-patterns frequently occur and should be explicitly avoided:
+
+```typescript
+// ANTI-PATTERN: Nested Input/Output Classes
+// ❌ AI creates: Separate Input.java, Output.java files
+// ✅ CORRECT: Inner classes within UseCase interface
+interface CreateProductUseCase {
+    class CreateProductInput implements Input {
+        public productId: string;
+        public name: string;
+        public userId: string;
+    }
+}
+
+// ANTI-PATTERN: if-else instanceof Chain
+// ❌ AI writes: Multiple if-else checks with instanceof
+// ✅ CORRECT: Switch expression with pattern matching
+when(event: ProductEvent): void {
+    switch (event) {
+        case ProductEvents.ProductCreated e -> {
+            this.id = e.productId();
+            this.name = e.name();
+        }
+        case ProductEvents.ProductRenamed e -> {
+            this.name = e.newName();
+        }
+    }
+}
+
+// ANTI-PATTERN: Automatic Repository Implementation
+// ❌ AI generates: Custom repository interface
+// ✅ CORRECT: Use framework GenericInMemoryRepository
+interface ProductRepository extends Repository<Product, ProductId> {
+    List<Product> findBySprintId(SprintId id);  // WRONG: Custom query
+}
+
+// ANTI-PATTERN: Contract Validation in Value Objects
+// ❌ AI uses: Contract.requireNotNull() in Value Object
+// ✅ CORRECT: Use Objects.requireNonNull()
+record ProductId(String value) implements ValueObject {
+    public ProductId {
+        Objects.requireNonNull(value, "Product ID cannot be null");
+    }
+}
+```
+
+### AI Prompt for Clean Code Refactoring
 
 Refactor the following code following Clean Code principles:
 
@@ -522,12 +569,36 @@ Output:
 2. Explanation of changes made
 3. Unit tests for the function
 ```
-</think>
 
-The file has been created. I notice the file was truncated. Let me continue creating the remaining documentation files. Due to the large number of files requested, I'll create them in batches.
-<minimax:tool_call>
-<invoke name="write">
-<parameter name="content"># Clean Code - Continued
+### AI Code Review Checklist
+
+When reviewing AI-generated code, use this enhanced checklist:
+
+```markdown
+## AI Code Review Checklist
+
+### 1. Architecture Compliance
+- [ ] Package location follows layer structure
+- [ ] Clean Architecture boundaries respected
+- [ ] Dependency direction is correct (inward)
+
+### 2. Coding Standards
+- [ ] Input class is inner class of UseCase
+- [ ] Value Objects use Objects.requireNonNull()
+- [ ] Repository pattern follows framework conventions
+- [ ] No nested Input/Output files
+
+### 3. Business Logic
+- [ ] Contract validation in constructors
+- [ ] Domain events properly applied
+- [ ] Aggregate invariants enforced
+- [ ] Soft delete pattern implemented
+
+### 4. Testability
+- [ ] Dependencies injected via constructor
+- [ ] No static references to framework
+- [ ] Can be unit tested in isolation
+```
 
 ## Testability
 

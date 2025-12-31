@@ -487,6 +487,62 @@ const filtered = items.filter(/* filter out done items */);
 
 ## Common Anti-Patterns to Avoid
 
+Based on analysis of AI-generated code, these anti-patterns frequently occur and should be explicitly avoided:
+
+| Anti-Pattern | AI Mistake | Correct Approach |
+|--------------|------------|------------------|
+| Input Class Location | Creates separate Input.java file | Inner class in UseCase interface |
+| Repository Pattern | Custom repository with findBy methods | Use framework GenericInMemoryRepository |
+| instanceof Chain | Multiple if-else with instanceof | Switch expression with pattern matching |
+| Value Object Validation | Uses Contract.requireNotNull() | Uses Objects.requireNonNull() |
+| Primitive Obsession | Uses String/Map for domain types | Value Objects with validation |
+| Nested Classes | Separate Input/Output files | Inner classes within UseCase |
+
+### AI-Specific Naming Conventions
+
+When AI generates code, ensure these naming patterns are followed:
+
+```typescript
+// ✅ CORRECT: Use Case Interface Naming
+interface AddTaskUseCase extends Command<AddTaskInput, CqrsOutput> {}
+
+// ✅ CORRECT: Input as Inner Class
+interface AddTaskUseCase {
+    class AddTaskInput implements Input {
+        public toDoListId: string;
+        public projectName: string;
+        public description: string;
+    }
+}
+
+// ✅ CORRECT: Service Implementation Naming
+class AddTaskService implements AddTaskUseCase {
+    constructor(
+        private repository: ToDoListRepository,
+        private presenter: TaskPresenter
+    ) {}
+}
+
+// ✅ CORRECT: Value Object with toString() for Outbox Pattern
+record TaskId(String value) implements ValueObject {
+    @Override
+    public String toString() {
+        return value;
+    }
+}
+```
+
+### Bounded Context Rules
+
+From DDD analysis, enforce these bounded context rules:
+
+| Rule | Description |
+|------|-------------|
+| BC-001 | Each Aggregate has its own top-level package |
+| BC-002 | Value Objects defined once per Aggregate, imported by others |
+| BC-003 | Cross-BC communication via Domain Events only |
+| BC-004 | Repository only within BC, no cross-BC queries |
+
 1. **Primitive Obsession**: Using primitives instead of value objects
 2. **Feature Envy**: Method accesses data of another class excessively
 3. **God Class**: Class with too many responsibilities
