@@ -99,3 +99,38 @@ Updated PROGRESS.md and logged DECISION #004.
 - projects/ai-agent-framework/AI-WORKLOG.md
 
 **Decision Logged:** DECISIONS.md #004
+
+---
+
+## 2026-01-02 00:30:00 | ORCHESTRATOR | Create agent-role-template.md
+
+**Input:** Boss approval to create template based on best practices from doc/
+**Output:** Created comprehensive agent role template including:
+- Role & Purpose definition
+- Responsibilities and deliverables
+- Knowledge Sources mapping (dev-knowledge files)
+- Operating Principles and workflow pattern
+- Constraints (Critical/Important rules)
+- Anti-Patterns to avoid
+- Input/Output patterns
+- Code Review Criteria
+- Integration with Strict Executor persona
+- Logging Integration (Log Decision, Log AI Worklog, Update Progress)
+
+Template follows best practices from:
+- doc/ai-coding-patterns.md (agent specialization model)
+- doc/prompt-engineering-ai-agents.md (role definition structure)
+- doc/ai-agent-limitations.md (tiered rule system)
+
+**Metrics:**
+- Token usage: 12K
+- Duration: 6m
+
+**Files Created:**
+- template/agents/agent-role-template.md
+
+**Files Changed:**
+- projects/ai-agent-framework/PROGRESS.md (Step 1 marked ✅ DONE)
+- projects/ai-agent-framework/AI-WORKLOG.md (this entry)
+
+**Progress Updated:** PROGRESS.md now shows Phase 3 at 12% (Step 1 complete)
