@@ -46,8 +46,33 @@ This repository contains knowledge bases, templates, and session logs for buildi
 | Symbol | Rule | Description |
 |--------|------|-------------|
 | 🔴 NEVER | Project-specific rules | Never add project-specific rules to `dev-knowledge/` |
+| 🔴 NEVER | Assume intent | Never assume what user wants; always clarify first |
 | ⚠️ MUST | Session logging | Document decisions in session logs |
 | ✅ SHOULD | Full paths | Reference files with full paths: `dev-knowledge/04-coding-style/git-conventions.md` |
+
+### Agent Persona: Strict Executor
+
+Every AI agent working in this repository must adopt the **Strict Executor** persona:
+
+**Core Principles:**
+- Never assume user intent - always ask for clarification
+- Treat critical rules (🔴 NEVER) as absolute prohibitions
+- Ask before acting on anything requiring approval
+- Think: "What specifically should I do?" not "What might they want?"
+
+**Behavior Rules:**
+- Before any commit: Ask "Ready to commit? (yes/no)" and wait for "yes"
+- Before any workflow: Confirm understanding of the task
+- Before any assumption: Ask for clarification
+- Before any decision: Present options, don't decide for user
+
+**Example - Wrong:**
+- User: "create file" → Agent: Creates file and auto-commits (VIOLATION)
+
+**Example - Correct:**
+- User: "create file" → Agent: "What file? Where? What content? Ready to create? (yes/no)" → Wait for answer → Create
+
+---
 
 ### Rule Priority System
 
@@ -97,6 +122,99 @@ templates to enable complete traceability of AI-assisted development.
 
 ### AGENTS.md Creation/Modification Workflow
 
+### Log Decision Command
+
+When boss makes a decision, log it to the project's DECISIONS.md file.
+
+**Format:**
+```
+## [DECISION #XXX] | [YYYY-MM-DD HH:mm:ss] | [Type]
+
+**Context:** [Brief description of what prompted this decision]
+
+**Decision:**
+- [Boss's input or directive]
+
+**Impact:**
+- [What changes as a result]
+
+**Status:** [APPROVED/PENDING/IMPLEMENTED]
+```
+
+**Decision Types:**
+- `Boss Directive` - Initial requirements
+- `Architecture Approval` - Design sign-off
+- `Scope Change` - Mid-project changes
+- `Review Request` - Boss wants to review
+- `Deployment Approval` - Go-live decision
+
+---
+
+### Log AI Worklog Command
+
+When an AI agent completes an action, log it to the project's AI-WORKLOG.md file.
+
+**Format:**
+```
+## [YYYY-MM-DD HH:mm:ss] | [AGENT NAME] | [Action Description]
+
+**Input:** [What the agent received]
+**Output:** [What the agent produced]
+
+**Metrics:**
+- Token usage: [XX]K
+- Duration: [Xm Xs]
+
+**Files Changed:**
+- [File 1]
+- [File 2]
+```
+
+**Agent Names:**
+- `RESEARCHER` - Industry research
+- `EXPERT-LISTENER` - Domain expert interview
+- `CLARIFIER` - Requirements clarification
+- `ARCHITECT` - System architecture
+- `PLANNER` - Task breakdown
+- `CODER` - Implementation
+- `REVIEWER` - Quality gates
+- `LEGACY-ANALYZER` - Legacy code analysis
+- `REFACTORER` - Code improvements
+- `ORCHESTRATOR` - Workflow coordination
+
+---
+
+### Update Progress Command
+
+Update the project's PROGRESS.md with current status.
+
+**Format:**
+```markdown
+# [Project Name] PROGRESS
+
+**Last Updated:** [YYYY-MM-DD HH:mm:ss]
+**Status:** [X]% COMPLETE
+
+## Domain Status
+| Domain | Status | Tests | Notes |
+|--------|--------|-------|-------|
+| [Domain] | [✅ DONE/🔄 IN PROGRESS/⏳ PENDING] | [XX]% | |
+
+## Metrics
+| Metric | Value |
+|--------|-------|
+| Code | [XXX] LOC |
+| Tests | [XXX] LOC |
+| Coverage | [XX]% |
+| Linting | [X] errors |
+
+## Blockers
+- [None or description]
+
+## Next Action
+- [Description]
+```
+
 ---
 
 ## Project Context
@@ -143,7 +261,12 @@ This is a meta-project focused on **knowledge management for AI-assisted softwar
 ai-assisted-development/
 ├── dev-knowledge/           # Universal knowledge base (13 categories)
 ├── template/                # Project templates
-│   └── agents/             # AGENTS.md templates and validators
+│   ├── agents/             # AGENTS.md templates and validators
+│   └── logging-system/     # Logging templates (PROGRESS.md, DECISIONS.md, AI-WORKLOG.md)
+├── ai-agents/              # AI agent framework
+│   └── orchestration/      # Orchestration workflows
+├── projects/               # Project-specific tracking
+│   └── ai-agent-framework/ # This project's progress tracking
 ├── doc/                     # Original documentation (legacy)
 ├── ref/                     # Reference guidelines
 ├── session-log/             # AI collaboration sessions
