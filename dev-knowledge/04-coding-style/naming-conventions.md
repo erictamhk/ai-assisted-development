@@ -10,7 +10,7 @@ Consistent naming conventions are critical for code readability and maintainabil
 
 ### Rules
 
-- **Singular nouns**: `Project`, `Task`, `ToDoList`
+- **Singular nouns**: `Project`, `Task`, `Order`
 - **Business domain terms**: Use ubiquitous language from domain model
 - **Noun phrase naming**: Clear business meaning
 - **No abbreviations**: Except common ones (ID, URL, API, HTTP, JSON, JWT, SQL)
@@ -39,7 +39,7 @@ class PayMeth { }
 
 ### Rules
 
-- **Represent identity**: `ProjectName`, `TaskId`, `ToDoListId`
+- **Represent identity**: `ProjectName`, `ItemId`, `OrderId`
 - **Use `record` keyword**: TypeScript records for immutability
 - **Immutable fields**: All fields are `readonly`
 - **Noun or noun phrase**: Describe what they represent
@@ -284,8 +284,8 @@ class CreateTaskResponseDto {
 ### Examples
 
 ```typescript
-// GOOD - Persistent Objects
-@Entity('tasks')
+// GOOD - Persistent Objects (TypeORM style)
+@Entity()
 class TaskPo {
   @PrimaryGeneratedColumn()
   public id: number;
@@ -662,10 +662,10 @@ interface AddTaskUseCase {
 }
 
 // ✅ CORRECT: Service Implementation Naming
-class AddTaskService implements AddTaskUseCase {
+class AddItemService implements AddItemUseCase {
     constructor(
-        private repository: ToDoListRepository,
-        private presenter: TaskPresenter
+        private repository: OrderRepository,
+        private presenter: ItemPresenter
     ) {}
 }
 

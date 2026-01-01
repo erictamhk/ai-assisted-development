@@ -84,24 +84,24 @@ Using Domain-Driven Design principles, identify potential bounded contexts:
 
 ```typescript
 // Monolithic code often has these patterns:
-class ToDoList {  // Domain concept - potential Aggregate Root
-  private tasks: Map<string, Task>;  // Could be separate Aggregate
-  private projects: Map<string, Project>;  // Could be separate Aggregate
+class Order {  // Domain concept - potential Aggregate Root
+  private items: Map<string, Item>;  // Could be separate Aggregate
+  private customer: Customer;  // Could be separate Aggregate
   
-  addTask() { /* ... */ }
-  createProject() { /* ... */ }  // Different domain concept
-  generateReport() { /* ... */ }  // Could be separate use case
+  addItem() { /* ... */ }
+  processPayment() { /* ... */ }  // Different domain concept
+  generateInvoice() { /* ... */ }  // Could be separate use case
 }
 
 // After analysis, identify bounded contexts:
-context ToDoList {
-  aggregate ToDoList
-  aggregate Project
-  aggregate Task
+context Order {
+  aggregate Order
+  aggregate Customer
+  aggregate Item
 }
 
-context Reporting {
-  // Report generation logic
+context Billing {
+  // Invoice generation logic
 }
 ```
 
@@ -161,19 +161,19 @@ Score Breakdown:
 Create a catalog of all major components:
 
 ```markdown
-## Component: ToDoList
+## Component: Order
 
 **Type**: Aggregate Root
-**Package**: tw.teddysoft.tasks.entity
+**Package**: com.example.orders.entity
 **Lines**: 450
 **Dependencies**:
-  - Task (internal)
-  - Project (internal)
+  - Item (internal)
+  - Customer (internal)
   - DateTime (stdlib)
 
 **Affected By**:
-  - ConsoleController (adapter)
-  - WebController (adapter)
+  - OrderController (adapter)
+  - OrderService (application)
 
 **Test Coverage**: 85%
 
@@ -190,10 +190,10 @@ Create a catalog of all major components:
 
 | Component | Business Value | Refactor Effort | Dependencies | Priority |
 |-----------|---------------|-----------------|--------------|----------|
-| ToDoList | High | Medium | Low | 1 |
-| Task | High | Low | Low | 2 |
+| Order | High | Medium | Low | 1 |
+| Customer | High | Low | Low | 2 |
 | UserService | Medium | High | Medium | 3 |
-| Reporting | Low | Medium | High | 4 |
+| Billing | Low | Medium | High | 4 |
 
 ---
 

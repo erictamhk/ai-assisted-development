@@ -334,244 +334,288 @@ Output:
 
 ---
 
-## ezSpec: A Domain-Driven Testing Framework
+## Framework-Agnostic Testing Pattern
 
-ezSpec is a Java-based testing framework designed for DDD projects. It provides a structured approach to creating executable specifications with rule-based scenario organization.
+This section describes a domain-driven testing pattern that can be implemented with any testing framework. The key is organizing test scenarios by business logic rules.
 
 ### Core Concept
 
-Each use case should have at least one corresponding ezSpec test case following these rules:
+Each use case should have at least one corresponding test case following these principles:
 
-### Rule Usage Guide
+### Rule-Based Scenario Organization
 
-ezSpec's Rule feature organizes test scenarios by business logic:
+Organize test scenarios by business logic rules:
 
-```java
+```typescript
 // Define Rule constants
-static final String SUCCESS_RULE = "Successful Creation";
-static final String VALIDATION_RULE = "Input Validation";
+const SUCCESS_RULE = "Successful Creation";
+const VALIDATION_RULE = "Input Validation";
 
-// Create Rules (after feature.initialize())
-@BeforeAll
-static void beforeAll() {
-    feature = Feature.New(FEATURE_NAME);
+// Setup (before all tests)
+describe("CreateOrderUseCase", () => {
+  let feature: Feature;
+  
+  beforeAll(() => {
+    feature = new Feature("Create Order");
     feature.initialize();
     
-    feature.NewRule(SUCCESS_RULE);
-    feature.NewRule(VALIDATION_RULE);
-}
+    feature.newRule(SUCCESS_RULE);
+    feature.newRule(VALIDATION_RULE);
+  });
 
-// Assign scenarios to rules
-@EzScenario(rule = SUCCESS_RULE)
-public void successful_scenario() { }
+  // Assign scenarios to rules
+  it("successful creation scenario", { rule: SUCCESS_RULE }, () => {
+    // Test implementation
+  });
 
-// Or use withRule()
-feature.newScenario().withRule(VALIDATION_RULE)
-    .Given("condition", env -> { })
-    .When("action", env -> { })
-    .ThenFailure(env -> { })
-    .Execute();
+  // Alternative: inline rule assignment
+  it("validation error scenario", () => {
+    feature.newScenario()
+      .withRule(VALIDATION_RULE)
+      .given("condition", env => { })
+      .when("action", env => { })
+      .thenFailure(env => { })
+      .execute();
+  });
+});
 ```
 
 ### Basic Example (without Rules)
 
-```java
-@EzFeature
-@EzFeatureReport
-public class CreateBoardUseCaseTest {
+```typescript
+describe("CreateOrderUseCase", () => {
+  let feature: Feature;
+  let testContext: TestContext;
 
-    static String FEATURE_NAME = "Create Board";
-    static Feature feature = Feature.New(FEATURE_NAME);
+  beforeAll(() => {
+    feature = new Feature("Create Order");
+    feature.initialize();
+    testContext = new TestContext();
+  });
 
-    @BeforeAll
-    static void beforeAll() {
-        feature.initialize();
-    }
+  it("creates an order successfully", () => {
+    feature.newScenario()
+      .given("a user who wants to create an order", env => {
+        const orderId = uuidv4();
+        const customerId = uuidv4();
+        const orderName = "My Order";
 
-    @EzScenario
-    public void create_a_board() {
-        feature.newScenario()
-                .Given("a user who wants to create a board", env -> {
-                    String boardId = UUID.randomUUID().toString();
-                    String ownerId = UUID.randomUUID().toString();
-                    String boardName = "My Kanban Board";
+        env.set("orderId", orderId);
+        env.set("customerId", customerId);
+        env.set("orderName", orderName);
+      })
+      .when("I create an order", env => {
+        const useCase = testContext.createOrderUseCase();
+        const input = {
+          id: env.get("orderId"),
+          name: env.get("orderName"),
+          customerId: env.get("customerId")
+        };
 
-                    env.put("boardId", boardId)
-                            .put("ownerId", ownerId)
-                            .put("boardName", boardName);
-                })
-                .When("I create a board", env -> {
-                    CreateBoardUseCase createBoardUseCase = getContext().newCreateBoardUseCase();
-                    CreateBoardInput input = CreateBoardInput.create();
-                    input.id = env.gets("boardId");
-                    input.name = env.gets("boardName");
-                    input.ownerId = env.gets("ownerId");
+        const output = useCase.execute(input);
+        env.set("output", output);
+        env.set("input", input);
+      })
+      .thenSuccess(env => {
+        const output = env.get("output");
+        expect(output.id).toBeDefined();
+        expect(output.exitCode).toBe("SUCCESS");
+      })
+      .and("the order should be persisted", env => {
+        const output = env.get("output");
+        const input = env.get("input");
+        const order = testContext.orderRepository()
+          .findById(output.id);
+        expect(order.id).toBe(output.id);
+        expect(order.name).toBe(input.name);
+      })
+      .and("an order created event should be published", env => {
+        const events = testContext.getPublishedEvents();
+        expect(events.length).toBe(1);
+        expect(events[0]).toBeInstanceOf(OrderCreated);
+      })
+      .execute();
+  });
+});
 
-                    var output = createBoardUseCase.execute(input);
-                    env.put("output", output)
-                            .put("input", input);
-                })
-                .ThenSuccess(env -> {
-                    var output = env.get("output", CqrsOutput.class);
-                    assertNotNull(output.getId());
-                    assertEquals(ExitCode.SUCCESS, output.getExitCode());
-                })
-                .And("the board should be persisted", env -> {
-                    var output = env.get("output", CqrsOutput.class);
-                    var input = env.get("input", CreateBoardInput.class);
-                    Board board = getContext().boardRepository()
-                        .findById(BoardId.valueOf(output.getId())).get();
-                    assertEquals(output.getId(), board.getId());
-                    assertEquals(input.name, board.getName());
-                })
-                .And("a board created event should be published", env -> {
-                    List<DomainEvent> events = getContext().getPublishedEvents();
-                    assertEquals(1, events.size());
-                    assertTrue(events.get(0) instanceof BoardEvents.BoardCreated);
-                })
-                .Execute();
-    }
+class TestContext {
+  private orderRepository: InMemoryRepository<Order, OrderId>;
+  private messageBus: MessageBus<DomainEvent>;
+  private publishedEvents: DomainEvent[];
 
-    @AfterAll
-    static void afterAll() {
-        PlainTextReport report = new PlainTextReport();
-        feature.accept(report);
-        System.out.println(report.toString());
-    }
+  constructor() {
+    this.publishedEvents = [];
+    this.messageBus = new BlockingMessageBus();
+    
+    this.messageBus.register(event => {
+      this.publishedEvents.push(event);
+    });
 
-    private TestContext getContext() {
-        return TestContext.getInstance();
-    }
+    this.orderRepository = new InMemoryRepository(this.messageBus);
+  }
 
-    static class TestContext {
-        private static TestContext instance;
-        private GenericInMemoryRepository<Board, BoardId> boardRepository;
-        private MessageBus<DomainEvent> messageBus;
-        private List<DomainEvent> publishedEvents;
+  createOrderUseCase(): CreateOrderUseCase {
+    return new CreateOrderService(this.orderRepository);
+  }
 
-        private TestContext() {
-            publishedEvents = new ArrayList<>();
-            messageBus = new BlockingMessageBus();
-            
-            messageBus.register(event -> {
-                if (event instanceof DomainEvent) {
-                    publishedEvents.add((DomainEvent) event);
-                }
-            });
+  orderRepository(): InMemoryRepository<Order, OrderId> {
+    return this.orderRepository;
+  }
 
-            boardRepository = new GenericInMemoryRepository<>(messageBus);
-        }
-
-        public static TestContext getInstance() {
-            if (instance == null) {
-                instance = new TestContext();
-            }
-            return instance;
-        }
-
-        public CreateBoardUseCase newCreateBoardUseCase() {
-            return new CreateBoardService(boardRepository);
-        }
-
-        public GenericInMemoryRepository<Board, BoardId> boardRepository() {
-            return boardRepository;
-        }
-
-        public List<DomainEvent> getPublishedEvents() {
-            return new ArrayList<>(publishedEvents);
-        }
-    }
+  getPublishedEvents(): DomainEvent[] {
+    return [...this.publishedEvents];
+  }
 }
 ```
 
 ### Using Rules for Scenario Organization
 
-```java
-@EzFeature
-@EzFeatureReport
-public class CreatePlanUseCaseTest {
+```typescript
+describe("CreatePlanUseCase", () => {
+  let feature: Feature;
+  
+  const SUCCESSFUL_CREATION_RULE = "Successful Plan Creation";
+  const INPUT_VALIDATION_RULE = "Input Validation";
+  const DUPLICATE_VALIDATION_RULE = "Duplicate Validation";
 
-    static String FEATURE_NAME = "Create Plan";
-    static Feature feature;
+  beforeAll(() => {
+    feature = new Feature("Create Plan");
+    feature.initialize();
     
-    // Define Rules
-    static final String SUCCESSFUL_CREATION_RULE = "Successful Plan Creation";
-    static final String INPUT_VALIDATION_RULE = "Input Validation";
-    static final String DUPLICATE_VALIDATION_RULE = "Duplicate Validation";
+    feature.newRule(SUCCESSFUL_CREATION_RULE);
+    feature.newRule(INPUT_VALIDATION_RULE);
+    feature.newRule(DUPLICATE_VALIDATION_RULE);
+  });
 
-    @BeforeAll
-    static void beforeAll() {
-        feature = Feature.New(FEATURE_NAME);
-        feature.initialize();
-        
-        feature.NewRule(SUCCESSFUL_CREATION_RULE);
-        feature.NewRule(INPUT_VALIDATION_RULE);
-        feature.NewRule(DUPLICATE_VALIDATION_RULE);
-    }
+  it("creates plan successfully", { rule: SUCCESSFUL_CREATION_RULE }, () => {
+    feature.newScenario()
+      .given("valid plan data", env => {
+        env.set("planId", uuidv4());
+        env.set("planName", "My Plan");
+        env.set("userId", "user123");
+      })
+      .when("I create the plan", env => {
+        const input = CreatePlanInput.create();
+        input.id = env.get("planId");
+        input.name = env.get("planName");
+        input.userId = env.get("userId");
+        const output = useCase.execute(input);
+        env.set("output", output);
+      })
+      .thenSuccess(env => {
+        const output = env.get("output");
+        expect(output.id).toBeDefined();
+      })
+      .execute();
+  });
 
-    @EzScenario(rule = SUCCESSFUL_CREATION_RULE)
-    public void create_plan_successfully() {
-        feature.newScenario()
-                .Given("valid plan data", env -> {
-                    env.put("planId", UUID.randomUUID().toString());
-                    env.put("planName", "My Plan");
-                    env.put("userId", "user123");
-                })
-                .When("I create the plan", env -> {
-                    CreatePlanInput input = CreatePlanInput.create();
+  it("rejects invalid input", { rule: INPUT_VALIDATION_RULE }, () => {
+    feature.newScenario()
+      .given("invalid plan data", env => {
+        env.set("planId", uuidv4());
+        env.set("planName", "");  // Invalid: empty name
+      })
+      .when("I try to create the plan", env => {
+        const input = CreatePlanInput.create();
+        input.id = env.get("planId");
+        input.name = env.get("planName");
+        try {
+          useCase.execute(input);
+          env.set("error", null);
+        } catch (e) {
+          env.set("error", e);
+        }
+      })
+      .thenFailure(env => {
+        const error = env.get("error");
+        expect(error).toBeDefined();
+      })
+      .execute();
+  });
+
+  it("rejects duplicate plan", { rule: DUPLICATE_VALIDATION_RULE }, () => {
+    feature.newScenario()
+      .given("existing plan name", env => {
+        env.set("existingPlanId", existingPlanId);
+        env.set("duplicateName", "Existing Plan Name");
+      })
+      .when("I try to create a plan with the same name", env => {
+        const input = CreatePlanInput.create();
+        input.name = env.get("duplicateName");
+        try {
+          useCase.execute(input);
+          env.set("error", null);
+        } catch (e) {
+          env.set("error", e);
+        }
+      })
+      .thenFailure(env => {
+        const error = env.get("error");
+        expect(error).toBeInstanceOf(DuplicatePlanError);
+      })
+      .execute();
+  });
+});
+```
+
+### Key Points for Framework-Agnostic Testing
+
+- Feature is initialized once before all tests
+- Rules MUST be created after `feature.initialize()`
+- Use `it("description", { rule: ruleName })` or `withRule(ruleName)` to assign scenarios
+- If no rule specified, scenarios are classified to default rule
+- Report generators create readable test output
                     input.id = env.gets("planId");
                     input.name = env.gets("planName");
                     input.userId = env.gets("userId");
-                    
                     var output = createPlanUseCase.execute(input);
-                    env.put("output", output);
+                    env.set("output", output);
                 })
-                .ThenSuccess(env -> {
-                    var output = env.get("output", CqrsOutput.class);
-                    assertEquals(ExitCode.SUCCESS, output.getExitCode());
+                .thenSuccess(env => {
+                    const output = env.get("output");
+                    expect(output.exitCode).toBe("SUCCESS");
                 })
-                .Execute();
+                .execute();
     }
 
-    @EzScenario(rule = INPUT_VALIDATION_RULE)
-    public void reject_empty_plan_name() {
-        feature.newScenario()
-                .Given("a plan with empty name", env -> {
-                    env.put("planName", "");
-                })
-                .When("I try to create the plan", env -> {
-                    // Implementation
-                })
-                .ThenFailure(env -> {
-                    // Assertions for failure case
-                })
-                .Execute();
-    }
+    it("rejects empty plan name", { rule: INPUT_VALIDATION_RULE }, () => {
+      feature.newScenario()
+        .given("a plan with empty name", env => {
+          env.set("planName", "");
+        })
+        .when("I try to create the plan", env => {
+          // Implementation
+        })
+        .thenFailure(env => {
+          // Assertions for failure case
+        })
+        .execute();
+    });
 
-    @EzScenario(rule = DUPLICATE_VALIDATION_RULE)
-    public void reject_duplicate_plan_id() {
-        feature.newScenario().withRule(DUPLICATE_VALIDATION_RULE)
-                .Given("an existing plan", env -> {
-                    // Setup existing plan
-                })
-                .When("I create a plan with same ID", env -> {
-                    // Try to create duplicate
-                })
-                .ThenFailure(env -> {
-                    // Verify rejection
-                })
-                .Execute();
-    }
-}
+    it("rejects duplicate plan ID", { rule: DUPLICATE_VALIDATION_RULE }, () => {
+      feature.newScenario()
+        .withRule(DUPLICATE_VALIDATION_RULE)
+        .given("an existing plan", env => {
+          // Setup existing plan
+        })
+        .when("I create a plan with same ID", env => {
+          // Try to create duplicate
+        })
+        .thenFailure(env => {
+          // Verify rejection
+        })
+        .execute();
+    });
+});
 ```
 
-### Key Points for ezSpec
+### Key Points for Framework-Agnostic Testing
 
-- `static Feature feature` is a static data member
+- Feature is a static data member
 - **Rules MUST be created after `feature.initialize()`**
-- Use `@EzScenario(rule = ruleName)` or `withRule(ruleName)` to assign scenarios
-- If no rule specified, scenarios归类到 default rule
-- `@EzFeatureReport` generates readable test reports
+- Use `it("description", { rule: ruleName })` or `withRule(ruleName)` to assign scenarios
+- If no rule specified, scenarios are classified to default rule
+- Report generators create readable test output
 
 ---
 
@@ -672,24 +716,24 @@ grep -r "old/path" .  # Confirm no missing references
 ```json
 {
   "query": "[QueryName]",
-  "behavior": "[描述查詢行為]",
+  "behavior": "[describe query behavior]",
   "input": [
-    { "name": "[inputField]", "type": "[Type]", "note": "[說明]" }
+    { "name": "[inputField]", "type": "[Type]", "note": "[description]" }
   ],
   "method": "[projection].query",
   "output": "[OutputType]",
   "domainModelNotes": [
-    "[任何領域模型相關說明]"
+    "[any domain model related notes]"
   ],
   "dependencies": [
-    { "name": "[dependencyName]", "type": "[DependencyType]", "note": "[用途說明]" }
+    { "name": "[dependencyName]", "type": "[DependencyType]", "note": "[usage description]" }
   ],
   "projections": [
     {
       "name": "[ProjectionName] extends Projection<[Input], [Output]>",
-      "description": "[Projection 用途說明]",
+      "description": "[projection usage description]",
       "location": "[aggregate].usecase.port.out.projection",
-      "implementation": "[aggregate].adapter.out.projection.Jpa[ProjectionName]",
+      "implementation": "[aggregate].adapter.out.projection.[ProjectionName]",
       "critical": true,
       "input": [
         { "name": "[inputField]", "type": "[Type]" }
@@ -699,7 +743,7 @@ grep -r "old/path" .  # Confirm no missing references
   "dataTransferObjects": [
     {
       "name": "[DtoName]",
-      "description": "[DTO 用途說明]",
+      "description": "[DTO usage description]",
       "location": "[aggregate].usecase.port",
       "fields": [
         { "name": "[fieldName]", "type": "[Type]" }
@@ -740,7 +784,7 @@ grep -r "old/path" .  # Confirm no missing references
 
 ### The Challenge of Domain Concepts
 
-**Scrum Core Artifacts困境**:
+**Scrum Core Artifacts Dilemma**:
 - Product Backlog is one of three core Scrum artifacts
 - Product Owner manages Product Backlog as primary responsibility
 - DDD modeling dilemma:

@@ -1611,26 +1611,26 @@ Decouples abstraction from implementation for multiple repository types:
 
 ```typescript
 // Abstraction
-interface ToDoListRepository {
-    findById(id: ToDoListId): Promise<ToDoList | null>;
-    save(aggregate: ToDoList): Promise<void>;
+interface OrderRepository {
+    findById(id: OrderId): Promise<Order | null>;
+    save(aggregate: Order): Promise<void>;
 }
 
 // Implementation 1: In-memory
-class ToDoListInMemoryRepository implements ToDoListRepository {
-    private store: Map<string, ToDoList> = new Map();
+class OrderInMemoryRepository implements OrderRepository {
+    private store: Map<string, Order> = new Map();
     // ... implementations
 }
 
-// Implementation 2: JPA/Spring Data
-class ToDoListCrudRepository implements ToDoListRepository {
-    private crudRepository: SpringDataRepository;
+// Implementation 2: Database ORM
+class OrderCrudRepository implements OrderRepository {
+    private crudRepository: Repository<Order>;
     // ... implementations
 }
 
 // Client uses abstraction, not concrete implementation
 class UseCase {
-    constructor(private repository: ToDoListRepository) {}
+    constructor(private repository: OrderRepository) {}
 }
 ```
 
@@ -1696,15 +1696,15 @@ interface ProductPo {
   updated_at: Date;
 }
 
-// PO is implementation-specific, may use framework annotations
-class JpaProductPo implements ProductPo {
+// PO is implementation-specific, may use ORM annotations
+class OrmProductPo implements ProductPo {
   constructor(
-    @Id public id: string,
-    @Column public name: string,
-    @Column(name = "price_cents") public priceCents: number,
-    @ManyToOne @JoinColumn(name = "category_id") public categoryId: string,
-    @Column public createdAt: Date,
-    @Column public updatedAt: Date
+    @PrimaryGeneratedColumn() public id: string,
+    @Column() public name: string,
+    @Column({ name: 'price_cents' }) public priceCents: number,
+    @ManyToOne() @JoinColumn({ name: 'category_id' }) public categoryId: string,
+    @CreateDateColumn() public createdAt: Date,
+    @UpdateDateColumn() public updatedAt: Date
   ) {}
 }
 ```

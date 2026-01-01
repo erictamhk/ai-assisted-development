@@ -528,35 +528,39 @@ void should_add_two_positive_numbers_correctly() {
 
 ## AI-Assisted Testing Patterns
 
-### ezSpec BDD Framework Pattern
+### BDD Testing Pattern
 
-```java
-@EzFeature
-public class CreateProductUseCaseTest {
-    static Feature feature = Feature.New("Create Product Use Case");
+```typescript
+describe("CreateProductUseCase", () => {
+  let feature: Feature;
+  let useCase: CreateProductUseCase;
 
-    @EzScenario
-    public void should_create_product_with_valid_input() {
-        feature.newScenario("Successfully create a product with valid input")
-            .Given("valid product creation input", env -> {
-                var input = CreateProductInput.create();
-                input.productId = "prod-001";
-                input.name = "Test Product";
-                input.userId = "user-001";
-                env.put("input", input);
-            })
-            .When("the use case is executed", env -> {
-                var input = env.get("input", CreateProductInput.class);
-                var output = useCase.execute(input);
-                env.put("output", output);
-            })
-            .Then("the product should be created successfully", env -> {
-                var output = env.get("output", CqrsOutput.class);
-                assertThat(output.isSuccessful()).isTrue();
-            })
-            .Execute();
-    }
-}
+  beforeAll(() => {
+    feature = new Feature("Create Product Use Case");
+    feature.initialize();
+  });
+
+  it("should create product with valid input", () => {
+    feature.newScenario("Successfully create a product with valid input")
+      .given("valid product creation input", env => {
+        const input = CreateProductInput.create();
+        input.productId = "prod-001";
+        input.name = "Test Product";
+        input.userId = "user-001";
+        env.set("input", input);
+      })
+      .when("the use case is executed", env => {
+        const input = env.get<CreateProductInput>("input");
+        const output = useCase.execute(input);
+        env.set("output", output);
+      })
+      .then("the product should be created successfully", env => {
+        const output = env.get<CqrsOutput>("output");
+        expect(output.isSuccessful()).toBe(true);
+      })
+      .execute();
+  });
+});
 ```
 
 ### Dual Profile Testing

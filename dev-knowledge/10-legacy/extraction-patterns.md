@@ -28,7 +28,7 @@ Recommended Extraction Order (Low to High Risk):
 3. Domain Services (e.g., Calculator, Validator)
    → Stateless, focused logic
 
-4. Aggregates (e.g., Order, ToDoList)
+4. Aggregates (e.g., Order, Cart)
    → Complex invariants, multiple entities
 
 5. Use Cases (e.g., CreateUser, ProcessOrder)
@@ -51,15 +51,14 @@ Recommended Extraction Order (Low to High Risk):
 
 **Before:**
 ```typescript
-class ToDoList {
-  private tasks: Map<string, Task>;
-  private projects: Map<string, Project>;
+class Order {
+  private items: Map<string, Item>;
+  private customer: Customer;
   
-  addTask(task: Task): void { /* ... */ }
-  removeTask(taskId: string): void { /* ... */ }
-  createProject(name: string): Project { /* ... */ }
-  deleteProject(projectId: string): void { /* ... */ }
-  generateReport(): Report { /* ... */ }  // Different responsibility
+  addItem(item: Item): void { /* ... */ }
+  removeItem(itemId: string): void { /* ... */ }
+  createShipment(address: Address): Shipment { /* ... */ }
+  generateInvoice(): Invoice { /* ... */ }  // Different responsibility
   exportToPDF(): void { /* ... */ }  // Different responsibility
 }
 ```
@@ -67,20 +66,18 @@ class ToDoList {
 **After:**
 ```typescript
 // Core domain
-class ToDoList {
-  private tasks: Map<string, Task>;
-  private projects: Map<string, Project>;
+class Order {
+  private items: Map<string, Item>;
+  private customer: Customer;
   
-  addTask(task: Task): void { /* ... */ }
-  removeTask(taskId: string): void { /* ... */ }
-  createProject(name: string): Project { /* ... */ }
-  deleteProject(projectId: string): void { /* ... */ }
+  addItem(item: Item): void { /* ... */ }
+  removeItem(itemId: string): void { /* ... */ }
 }
 
 // Extracted - Reporting concern
-class ReportGenerator {
-  generateFor(toDoList: ToDoList): Report { /* ... */ }
-  exportToPDF(report: Report): void { /* ... */ }
+class InvoiceGenerator {
+  generateFor(order: Order): Invoice { /* ... */ }
+  exportToPDF(report: Invoice): void { /* ... */ }
 }
 ```
 
@@ -475,19 +472,19 @@ gateway.registerRoute('/api/products', {
 
 ```typescript
 // Abstraction - Domain interface
-interface ToDoListRepository {
-  findById(id: ToDoListId): Promise<ToDoList | null>;
-  save(toDoList: ToDoList): Promise<void>;
+interface OrderRepository {
+  findById(id: OrderId): Promise<Order | null>;
+  save(order: Order): Promise<void>;
 }
 
 // Implementor - Infrastructure
-interface ToDoListRepositoryPeer {
+interface OrderRepositoryPeer {
   findByIdRaw(id: string): Promise<any>;
   saveRaw(data: any): Promise<void>;
 }
 
 // Concrete implementations
-class InMemoryPeer implements ToDoListRepositoryPeer {
+class InMemoryPeer implements OrderRepositoryPeer {
   private store: Map<string, any> = new Map();
   
   async findByIdRaw(id: string): Promise<any> {
@@ -499,29 +496,32 @@ class InMemoryPeer implements ToDoListRepositoryPeer {
   }
 }
 
-class JpaPeer implements ToDoListRepositoryPeer {
-  constructor(private entityManager: EntityManager) {}
+class DatabasePeer implements OrderRepositoryPeer {
+  constructor(private database: Database) {}
   
   async findByIdRaw(id: string): Promise<any> {
-    return this.entityManager.find(ToDoListEntity, id);
+    return this.database.query('SELECT * FROM orders WHERE id = ?', [id]);
   }
   
   async saveRaw(data: any): Promise<void> {
-    this.entityManager.persist(data);
+    await this.database.query(
+      'INSERT INTO orders (id, data) VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET data = ?',
+      [data.id, JSON.stringify(data), JSON.stringify(data)]
+    );
   }
 }
 
 // Bridge - Connects abstraction to implementation
-class ToDoListRepositoryBridge implements ToDoListRepository {
-  constructor(private peer: ToDoListRepositoryPeer) {}
+class OrderRepositoryBridge implements OrderRepository {
+  constructor(private peer: OrderRepositoryPeer) {}
   
-  async findById(id: ToDoListId): Promise<ToDoList | null> {
+  async findById(id: OrderId): Promise<Order | null> {
     const data = await this.peer.findByIdRaw(id.value);
-    return data ? ToDoListMapper.toDomain(data) : null;
+    return data ? OrderMapper.toDomain(data) : null;
   }
   
-  async save(toDoList: ToDoList): Promise<void> {
-    const data = ToDoListMapper.toPersistence(toDoList);
+  async save(order: Order): Promise<void> {
+    const data = OrderMapper.toPersistence(order);
     await this.peer.saveRaw(data);
   }
 }
@@ -680,9 +680,9 @@ This appendix documents a proven refactoring journey from monolithic application
    - `io/` - Entry points
 
 2. Apply DDD Tactical Design:
-   - ToDoList → Aggregate Root
-   - Project, Task → Entities
-   - ProjectName, TaskId, ToDoListId → Value Objects
+    - Order → Aggregate Root
+    - Customer, Item → Entities
+    - CustomerName, ItemId, OrderId → Value Objects
 
 3. Remove Primitive Obsession:
    - Replace `Map<String, List<Task>>` with `Tasks` class
@@ -704,12 +704,12 @@ This appendix documents a proven refactoring journey from monolithic application
 **Focus:** Find more classes in entity package by extracting command/query logic
 
 **Changes (using "Extract Class from Private Method" pattern):**
-1. Extract `ToDoList::show` → Show class
-2. Extract `ToDoList::add` → Add class
-3. Extract `ToDoList::setDone` → SetDone class
-4. Extract `ToDoList::help` → Help class
-5. Extract `ToDoList::error` → Error class
-6. Extract `ToDoList::execute` → Execute class
+1. Extract `Order::show` → Show class
+2. Extract `Order::add` → Add class
+3. Extract `Order::setDone` → SetDone class
+4. Extract `Order::cancel` → Cancel class
+5. Extract `Order::error` → Error class
+6. Extract `Order::execute` → Execute class
 
 7. Clean entity package:
    - Move classes with external/IO references to usecase package
@@ -728,28 +728,28 @@ This appendix documents a proven refactoring journey from monolithic application
 **Focus:** Implement Use Case pattern with Input/Output
 
 **Command Use Cases:**
-1. AddProjectUseCase:
-   - AddProjectInput
-   - AddProjectService
-   - ToDoListRepository
+1. AddItemUseCase:
+    - AddItemInput
+    - AddItemService
+    - OrderRepository
 
-2. AddTaskUseCase:
-   - AddTaskInput
-   - AddTaskService
+2. RemoveItemUseCase:
+    - RemoveItemInput
+    - RemoveItemService
 
-3. SetDoneUseCase:
-   - SetDoneInput
-   - SetDoneService
+3. SubmitOrderUseCase:
+    - SubmitOrderInput
+    - SubmitOrderService
 
 **Query Use Cases:**
-1. ShowUseCase:
-   - ShowInput, ShowOutput
-   - ShowService, ShowPresenter
-   - DTOs and Mappers
+1. ShowOrderUseCase:
+    - ShowInput, ShowOutput
+    - ShowService, ShowPresenter
+    - DTOs and Mappers
 
-2. HelpUseCase:
-   - HelpInput, HelpOutput
-   - HelpService, HelpPresenter
+2. OrderHistoryUseCase:
+    - OrderHistoryInput, OrderHistoryOutput
+    - OrderHistoryService, OrderHistoryPresenter
 
 **Patterns Applied:**
 - Command Query Separation
@@ -915,7 +915,7 @@ This appendix documents a proven refactoring journey from monolithic application
 
 **Final Architecture:**
 ```
-tw.teddysoft.tasks/
+com.example.orders/
 ├── entity/                    # Domain Layer
 ├── usecase/                   # Application Layer
 ├── adapter/

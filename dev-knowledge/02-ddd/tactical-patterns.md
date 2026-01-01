@@ -410,31 +410,31 @@ interface ProjectTransferService {
   ): Promise<CqrsOutput>;
 }
 
-class ProjectTransferServiceImpl implements ProjectTransferService {
+class OrderTransferServiceImpl implements OrderTransferService {
   constructor(
-    private toDoListRepository: ToDoListRepository
+    private orderRepository: OrderRepository
   ) {}
 
-  async execute(input: TransferTaskInput): Promise<CqrsOutput> {
-    const toDoList = await this.toDoListRepository.findById(
-      ToDoListId.of(input.toDoListId)
+  async execute(input: TransferItemInput): Promise<CqrsOutput> {
+    const order = await this.orderRepository.findById(
+      OrderId.of(input.orderId)
     );
 
-    if (!toDoList) {
-      return CqrsOutput.create().fail().setMessage('ToDoList not found');
+    if (!order) {
+      return CqrsOutput.create().fail().setMessage('Order not found');
     }
 
-    const fromProject = toDoList.findProject(ProjectName.of(input.fromProjectName));
-    const toProject = toDoList.findProject(ProjectName.of(input.toProjectName));
+    const fromCustomer = order.findCustomer(CustomerName.of(input.fromCustomerName));
+    const toCustomer = order.findCustomer(CustomerName.of(input.toCustomerName));
 
-    if (!fromProject || !toProject) {
-      return CqrsOutput.create().fail().setMessage('Source or target project not found');
+    if (!fromCustomer || !toCustomer) {
+      return CqrsOutput.create().fail().setMessage('Source or target customer not found');
     }
 
-    const task = fromProject.removeTask(TaskId.of(input.taskId));
-    toProject.addTask(task.getDescription());
+    const item = fromCustomer.removeItem(ItemId.of(input.itemId));
+    toCustomer.addItem(item.getDescription());
 
-    await this.toDoListRepository.save(toDoList);
+    await this.orderRepository.save(order);
 
     return CqrsOutput.create().succeed();
   }

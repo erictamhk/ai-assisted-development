@@ -26,12 +26,12 @@ TRADITIONAL LAYER-BASED STRUCTURE
 
 src/
 ├── domain/
-│   ├── Project.java
-│   ├── Task.java
-│   └── ToDoList.java
+│   ├── Order.java
+│   ├── Customer.java
+│   └── Item.java
 ├── usecase/
-│   ├── AddProjectUseCase.java
-│   ├── AddTaskUseCase.java
+│   ├── CreateOrderUseCase.java
+│   ├── UpdateOrderUseCase.java
 │   └── ...
 ├── adapter/
 │   ├── controller/
@@ -42,28 +42,28 @@ src/
 Problem: Related code is scattered across the project
          Changes span multiple directories
          Hard to see feature boundaries
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 VERTICAL SLICE STRUCTURE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 src/
-├── project/              # Feature: Project management
-│   ├── domain/           # Domain objects for this feature
-│   ├── usecase/          # Use cases for this feature
-│   └── adapter/          # Adapters for this feature
+├── order/              # Feature: Order management
+│   ├── domain/         # Domain objects for this feature
+│   ├── usecase/        # Use cases for this feature
+│   └── adapter/        # Adapters for this feature
 │
-├── task/                 # Feature: Task management
+├── customer/           # Feature: Customer management
 │   ├── domain/
 │   ├── usecase/
 │   └── adapter/
 │
-├── todolist/             # Feature: ToDoList aggregate root
+├── payment/            # Feature: Payment processing
 │   ├── domain/
 │   ├── usecase/
 │   └── adapter/
 │
-└── shared/               # Cross-cutting concerns
+└── shared/             # Cross-cutting concerns
     ├── adapter/
     └── io/
 
@@ -242,11 +242,11 @@ FEATURE INDEPENDENCE
 ✓ CORRECT: Each feature is self-contained
    project/ → domain + usecase + adapter
    task/ → domain + usecase + adapter
-   todolist/ → domain + usecase + adapter
+   order/ → domain + usecase + adapter
 
 ✓ CORRECT: Cross-feature communication through aggregate root
-   task/ → todolist/ (aggregate root) → project/
-   (task communicates with project through todolist)
+   task/ → order/ (aggregate root) → project/
+   (task communicates with project through order)
 
 ✗ WRONG: Direct dependencies between features
    task/ → project/ (direct import, BAD)
@@ -261,38 +261,38 @@ FEATURE INDEPENDENCE
 
 ### Aggregate Root Pattern
 
-The aggregate root feature (todolist/) serves as the entry point for managing other features:
+The aggregate root feature (order/) serves as the entry point for managing other features:
 
 ```
 AGGREGATE ROOT COMMUNICATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-todolist/ (Aggregate Root)
+order/ (Aggregate Root)
     │
-    ├── Manages project/ entities
+    ├── Manages customer/ entities
     │   └── Controls consistency boundaries
     │
-    ├── Manages task/ entities
+    ├── Manages item/ entities
     │   └── Ensures business invariants
     │
     └── Provides repository interfaces
         → used by all features
 
-task/ Feature
-    ├── Depends on todolist/ repository interface
-    ├── NO direct dependency on project/
-    └── Imports NO domain classes from project/
+item/ Feature
+    ├── Depends on order/ repository interface
+    ├── NO direct dependency on customer/
+    └── Imports NO domain classes from customer/
 
-project/ Feature
-    ├── Depends on todolist/ repository interface
-    ├── NO direct dependency on task/
-    └── Imports NO domain classes from task/
+customer/ Feature
+    ├── Depends on order/ repository interface
+    ├── NO direct dependency on item/
+    └── Imports NO domain classes from item/
 
 shared/ Infrastructure
     ├── Contains repository implementations
     ├── Contains configuration classes
     └── Used by all features
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
@@ -339,18 +339,18 @@ adapter/out/ → depends on → usecase/port/out/ (output ports) + domain/
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 INTER-FEATURE DEPENDENCIES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-todolist/ (aggregate root)
+order/ (aggregate root)
     ↓ manages
-project/ and task/
-    → communicate through todolist/ ONLY
+customer/ and item/
+    → communicate through order/ ONLY
     → NO direct imports between features
 
-task/ and project/
+item/ and customer/
     → depend ONLY on shared/ for infrastructure
     → NEVER depend on each other
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 DEPENDENCY VIOLATIONS (NEVER DO)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -716,9 +716,9 @@ public ActionUseCase actionUseCase(NewFeatureRepository repo) {
 }
 
 # Step 4: Update aggregate root if needed
-# In todolist/domain/ToDoList.java:
+# In order/domain/Order.java:
 public NewFeature getNewFeature() {
-    // If new feature is managed by ToDoList
+    // If new feature is managed by Order
 }
 ```
 
@@ -809,24 +809,22 @@ shared/
 ├── adapter/
 │   └── out/
 │       └── repository/
-│           ├── ProjectCrudRepository.java
-│           ├── TaskCrudRepository.java
-│           ├── ToDoListCrudRepository.java
-│           ├── ProjectInMemoryRepository.java
-│           ├── TaskInMemoryRepository.java
-│           └── ToDoListInMemoryRepository.java
+│           ├── OrderCrudRepository.ts
+│           ├── CustomerCrudRepository.ts
+│           ├── OrderInMemoryRepository.ts
+│           └── CustomerInMemoryRepository.ts
 │
 └── io/
-    ├── springboot/
-    │   ├── Application.java
+    ├── express/
+    │   ├── Application.ts
     │   └── config/
-    │       ├── RepositoryInjection.java
-    │       ├── UseCaseInjection.java
-    │       ├── DataSourceConfig.java
-    │       └── SecurityConfig.java
+    │       ├── RepositoryInjection.ts
+    │       ├── UseCaseInjection.ts
+    │       ├── DataSourceConfig.ts
+    │       └── SecurityConfig.ts
     │
     └── standard/
-        └── Main.java
+        └── Main.ts
 ```
 
 ### TypeScript Implementation

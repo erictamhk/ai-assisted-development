@@ -681,5 +681,5 @@ commands:
 
 5. **Clarify Relationships**:
    ```
-   "Workflow OWNS Lanes (composition) - deleting a workflow deletes all its lanes. Workflow REFERENCES Board (association) - deleting a board doesn't automatically delete workflows."
+   "Order OWNS OrderItems (composition) - deleting an order deletes all its items. Order REFERENCES Customer (association) - deleting a customer doesn't automatically delete orders."
    ```

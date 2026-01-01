@@ -4,10 +4,10 @@
 
 This document captures a proven 14-step refactoring journey from a monolithic application to Clean Architecture with Domain-Driven Design. Each step builds upon the previous, maintaining working code throughout the transformation.
 
-**Project**: Task List Application (ToDo List)  
-**Language**: Java 21  
-**Framework**: Spring Boot 2.7.18  
-**Testing**: JUnit 5
+**Project**: E-Commerce Order Management System  
+**Language**: TypeScript  
+**Framework**: Node.js with Express  
+**Testing**: Jest
 
 ---
 
@@ -16,69 +16,65 @@ This document captures a proven 14-step refactoring journey from a monolithic ap
 ### Final Architecture Structure
 
 ```
-tw.teddysoft.tasks/
+com.example.orders/
 ├── entity/                          # Domain Layer
-│   ├── ToDoList.java               # Aggregate Root
-│   ├── Project.java                # Entity
-│   ├── Task.java                   # Entity
-│   ├── ProjectName.java            # Value Object
-│   ├── TaskId.java                 # Value Object
-│   ├── ToDoListId.java             # Value Object
-│   ├── ReadOnlyProject.java        # Interface
-│   └── ReadOnlyTask.java           # Interface
+│   ├── Order.ts                     # Aggregate Root
+│   ├── Customer.ts                  # Entity
+│   ├── Item.ts                      # Entity
+│   ├── CustomerName.ts              # Value Object
+│   ├── ItemId.ts                    # Value Object
+│   ├── OrderId.ts                   # Value Object
+│   ├── ReadOnlyCustomer.ts          # Interface
+│   └── ReadOnlyItem.ts              # Interface
 │
 ├── usecase/                        # Application Layer
-│   ├── AddProjectUseCase/          # Command
-│   ├── AddTaskUseCase/             # Command
-│   ├── SetDoneUseCase/             # Command
-│   ├── DeleteTaskUseCase/          # Command
-│   ├── ShowUseCase/                # Query
-│   ├── HelpUseCase/                # Query
-│   ├── ErrorUseCase/               # Query
-│   ├── DeadlineUseCase/            # Query
-│   ├── TodayUseCase/               # Query
-│   ├── ViewTaskUseCase/            # Query
-│   ├── port/                       # Output Port (Mappers)
-│   └── TestUtil.java
+│   ├── AddCustomerUseCase/          # Command
+│   ├── AddItemUseCase/              # Command
+│   ├── RemoveItemUseCase/           # Command
+│   ├── SubmitOrderUseCase/          # Command
+│   ├── ShowOrderUseCase/            # Query
+│   ├── OrderHistoryUseCase/         # Query
+│   ├── ErrorUseCase/                # Query
+│   ├── port/                        # Output Port (Mappers)
+│   └── TestUtil.ts
 │
 ├── adapter/
 │   ├── in/
 │   │   ├── controller/
 │   │   │   ├── console/           # Console Controllers
-│   │   │   │   ├── ConsoleControllerExecutor.java
-│   │   │   │   ├── ToDoListCommands.java
-│   │   │   │   ├── Request.java
-│   │   │   │   ├── Response.java
-│   │   │   │   ├── AddProjectConsoleController.java
-│   │   │   │   ├── AddTaskConsoleController.java
+│   │   │   │   ├── ConsoleControllerExecutor.ts
+│   │   │   │   ├── OrderCommands.ts
+│   │   │   │   ├── Request.ts
+│   │   │   │   ├── Response.ts
+│   │   │   │   ├── AddCustomerConsoleController.ts
+│   │   │   │   ├── AddItemConsoleController.ts
 │   │   │   │   └── ...
 │   │   │   └── web/               # Web Controllers (REST)
-│   │   │       ├── AddProjectController.java
-│   │   │       ├── AddTaskController.java
-│   │   │       ├── SetDoneController.java
-│   │   │       ├── ShowController.java
-│   │   │       └── HelpController.java
+│   │   │       ├── AddCustomerController.ts
+│   │   │       ├── AddItemController.ts
+│   │   │       ├── RemoveItemController.ts
+│   │   │       ├── SubmitOrderController.ts
+│   │   │       └── ShowOrderController.ts
 │   └── out/
 │       ├── presenter/              # Presenters
-│       │   ├── ShowConsolePresenter.java
-│       │   ├── HelpConsolePresenter.java
-│       │   ├── ViewTaskConsolePresenter.java
-│       │   └── HelpWebPresenter.java
+│       │   ├── ShowConsolePresenter.ts
+│       │   ├── OrderHistoryConsolePresenter.ts
+│       │   └── ShowWebPresenter.ts
 │       └── repository/             # Repositories
-│           ├── ToDoListCrudRepository.java
-│           ├── ToDoListInMemoryRepository.java
-│           ├── ToDoListCrudRepositoryPeer.java
-│           └── ToDoListInMemoryRepositoryPeer.java
+│           ├── OrderCrudRepository.ts
+│           ├── OrderInMemoryRepository.ts
+│           ├── OrderCrudRepositoryPeer.ts
+│           └── OrderInMemoryRepositoryPeer.ts
 │
 └── io/
     ├── standard/
-    │   └── ToDoListApp.java        # Console Entry Point
-    └── springboot/
-        ├── ToDoListSpringBootApp.java
+    │   └── OrderApp.ts             # Console Entry Point
+    └── express/
+        ├── OrderExpressApp.ts
         └── config/
-            ├── UseCaseInjection.java
-            ├── RepositoryInjection.java
-            └── ToDoListDataSourceConfiguration.java
+            ├── UseCaseInjection.ts
+            ├── RepositoryInjection.ts
+            └── OrderDataSourceConfiguration.ts
 ```
 
 ---
@@ -113,18 +109,18 @@ tw.teddysoft.tasks/
 2. Move Task.java to entity package
 
 3. Apply DDD Tactical Design:
-   - ToDoList → Aggregate Root
-   - Project, Task → Entities
-   - ProjectName, TaskId, ToDoListId → Value Objects
+    - Order → Aggregate Root
+    - Customer, Item → Entities
+    - CustomerName, ItemId, OrderId → Value Objects
 
 4. Remove Primitive Obsession:
-   - Replace `Map<String, List<Task>>` with `Tasks` class
-   - Replace `Map<ProjectName, List<Task>>` with `Project` class
-   - Create `ProjectName` record
+    - Replace `Map<String, List<Item>>` with `Items` class
+    - Replace `Map<CustomerName, List<Item>>` with `Customer` class
+    - Create `CustomerName` record
 
 5. Establish Ubiquitous Language:
-   - Rename `Tasks` to `ToDoList`
-   - Rename methods to meaningful domain terms
+    - Rename `ItemCollection` to `Order`
+    - Rename methods to meaningful domain terms
 
 **Patterns Applied**:
 - Layered Architecture
@@ -141,12 +137,12 @@ tw.teddysoft.tasks/
 **Focus**: Find more classes in entity package by extracting command/query logic
 
 **Changes** (using "Extract Class from Private Method" pattern):
-1. Extract TaskList::show → Show class
-2. Extract TaskList::add → Add class
-3. Extract TaskList::setDone → SetDone class
-4. Extract TaskList::help → Help class
-5. Extract TaskList::error → Error class
-6. Extract TaskList::execute → Execute class
+1. Extract Order::show → Show class
+2. Extract Order::add → Add class
+3. Extract Order::remove → Remove class
+4. Extract Order::submit → Submit class
+5. Extract Order::error → Error class
+6. Extract Order::execute → Execute class
 
 7. Clean entity package:
    - Move classes with external/IO references to usecase package
@@ -165,36 +161,36 @@ tw.teddysoft.tasks/
 **Focus**: Implement Use Case pattern with Input/Output
 
 **Command Use Cases**:
-1. AddProjectUseCase:
-   - AddProjectInput
-   - AddProjectService
-   - ToDoListRepository
-   - ToDoListInMemoryRepository
+1. AddCustomerUseCase:
+    - AddCustomerInput
+    - AddCustomerService
+    - OrderRepository
+    - OrderInMemoryRepository
 
-2. AddTaskUseCase:
-   - AddTaskInput
-   - AddTaskService
-   - Inline Add to Execute
+2. AddItemUseCase:
+    - AddItemInput
+    - AddItemService
+    - Inline Add to Execute
 
-3. SetDoneUseCase:
-   - SetDoneInput
-   - SetDoneService
+3. SubmitOrderUseCase:
+    - SubmitOrderInput
+    - SubmitOrderService
 
 **Query Use Cases**:
-1. ShowUseCase:
-   - ShowInput, ShowOutput
-   - ShowService, ShowPresenter
-   - ShowConsolePresenter
-   - ToDoListDto, ProjectDto, TaskDto
-   - ToDoListMapper, ProjectMapper, TaskMapper
+1. ShowOrderUseCase:
+    - ShowInput, ShowOutput
+    - ShowService, ShowPresenter
+    - ShowConsolePresenter
+    - OrderDto, CustomerDto, ItemDto
+    - OrderMapper, CustomerMapper, ItemMapper
 
-2. HelpUseCase:
-   - HelpInput, HelpOutput
-   - HelpService, HelpDto
-   - HelpPresenter, HelpConsolePresenter
+2. OrderHistoryUseCase:
+    - OrderHistoryInput, OrderHistoryOutput
+    - OrderHistoryService, OrderDto
+    - OrderHistoryPresenter, OrderHistoryConsolePresenter
 
 3. ErrorUseCase:
-   - ErrorInput, ErrorService
+    - ErrorInput, ErrorService
 
 **Patterns Applied**:
 - Command Query Separation
@@ -209,14 +205,14 @@ tw.teddysoft.tasks/
 **Focus**: Extract and inject use case dependencies
 
 **Changes**:
-1. Move Execute to adapter.controller package, rename to ToDoListConsoleController
-2. Inject ShowUseCase and ShowPresenter
-3. Inject AddProjectUseCase
-4. Inject AddTaskUseCase
-5. Inject SetDoneUseCase
-6. Inject HelpUseCase
+1. Move Execute to adapter.controller package, rename to OrderConsoleController
+2. Inject ShowOrderUseCase and ShowPresenter
+3. Inject AddCustomerUseCase
+4. Inject AddItemUseCase
+5. Inject SubmitOrderUseCase
+6. Inject OrderHistoryUseCase
 7. Inject ErrorUseCase
-8. Remove unused ToDoList from controller
+8. Remove unused Order from controller
 
 **Patterns Applied**:
 - Dependency Injection (Constructor Injection)
@@ -232,11 +228,11 @@ tw.teddysoft.tasks/
 **Focus**: Identify entry point and apply DI framework
 
 **Changes**:
-1. Move TaskList to io package, rename to ToDoListApp (Main Component)
-2. Use ToDoListApp::main and ApplicationTest as DI frameworks manually
-3. Add SpringBoot dependencies to pom.xml
-4. Create ToDoListSpringBootApp
-5. Create SpringBootApplicationTest
+1. Move OrderCollection to io package, rename to OrderApp (Main Component)
+2. Use OrderApp::main and ApplicationTest as DI frameworks manually
+3. Add Express dependencies to package.json
+4. Create OrderExpressApp
+5. Create ExpressApplicationTest
 
 **Patterns Applied**:
 - Application Entry Point
@@ -252,12 +248,12 @@ tw.teddysoft.tasks/
 **Focus**: Support REST API alongside console
 
 **Changes**:
-1. Create AddProjectController in adapter.controller.web
-2. Move ToDoListController to adapter.controller.console
-3. Create AddTaskController
-4. Create SetDoneController
-5. Create HelpController
-6. Create ShowController
+1. Create AddCustomerController in adapter.controller.web
+2. Move OrderController to adapter.controller.console
+3. Create AddItemController
+4. Create RemoveItemController
+5. Create OrderHistoryController
+6. Create ShowOrderController
 
 **Patterns Applied**:
 - Adapter Pattern
@@ -273,13 +269,13 @@ tw.teddysoft.tasks/
 **Focus**: Introduce persistence layer
 
 **Changes**:
-1. Define ToDoListPoRepository interface
-2. Implement ToDoListPo, ProjectPo, TaskPo
-3. Write Mappers (ToDoListMapperTest, ProjectMapperTest, TaskMapperTest)
+1. Define OrderPoRepository interface
+2. Implement OrderPo, CustomerPo, ItemPo
+3. Write Mappers (OrderMapperTest, CustomerMapperTest, ItemMapperTest)
 4. Apply Bridge Pattern:
-   - Move ToDoListPoRepository to adapter.repository
-   - Rename to ToDoListRepositoryPeer
-   - Implement ToDoListInMemoryRepositoryPeer
+   - Move OrderPoRepository to adapter.repository
+   - Rename to OrderRepositoryPeer
+   - Implement OrderInMemoryRepositoryPeer
 5. Revise DI to inject repository peer
 
 **Patterns Applied**:
@@ -292,23 +288,23 @@ tw.teddysoft.tasks/
 
 ---
 
-### Step 9: Use Relational Database via JPA
+### Step 9: Use Relational Database via ORM
 
 **Focus**: Switch from in-memory to persistent storage
 
 **Changes**:
-1. Add JPA annotations to ToDoListPo, ProjectPo, TaskPo
-2. Create ToDoListCrudRepositoryPeer (Spring Data JPA)
-3. Create ToDoListCrudRepository
-4. Create ToDoListDataSourceConfiguration
-5. Revise RepositoryInjection for SpringBoot
+1. Add ORM annotations to OrderPo, CustomerPo, ItemPo
+2. Create OrderCrudRepositoryPeer (TypeORM/Prisma)
+3. Create OrderCrudRepository
+4. Create OrderDataSourceConfiguration
+5. Revise RepositoryInjection for Express
 
 **Patterns Applied**:
-- Spring Data JPA
+- TypeORM/Prisma
 - Repository Pattern
 - Dependency Injection
 
-**Key Insight**: Same repository interface, different implementations (in-memory/JPA)
+**Key Insight**: Same repository interface, different implementations (in-memory/ORM)
 
 ---
 
@@ -316,18 +312,18 @@ tw.teddysoft.tasks/
 
 **Focus**: Add new features using established patterns
 
-**Step 10 - Add New Feature Deadlines**:
-1. TDD DeadlineUseCase with DeadlineUseCaseTest
-2. Implement DeadlineUseCase, DeadlineInput, DeadlineService
-3. Revise Task to support deadline
-4. Create TaskPo deadline field
-5. Revise console controller for deadline command
+**Step 10 - Add New Feature Shipment**:
+1. TDD ShipOrderUseCase with ShipOrderUseCaseTest
+2. Implement ShipOrderUseCase, ShipOrderInput, ShipOrderService
+3. Revise Order to support shipment
+4. Create OrderPo shipment field
+5. Revise REST controller for shipment endpoint
 
-**Step 11 - Add New Feature Customisable IDs**:
-1. TDD AddTaskUseCase with custom ID support
-2. Revise AddTaskInput, AddTaskService
-3. Implement TaskId value object
-4. Revise console controller for task2 command
+**Step 11 - Add New Feature Customizable IDs**:
+1. TDD AddItemUseCase with custom ID support
+2. Revise AddItemInput, AddItemService
+3. Implement ItemId value object
+4. Revise REST controller for item2 endpoint
 
 **Patterns Applied**:
 - Test-Driven Development
@@ -338,22 +334,22 @@ tw.teddysoft.tasks/
 
 ---
 
-### Step 12-13: Console Controller Refinement
+### Step 12-13: Controller Refinement
 
-**Focus**: Improve console interface
+**Focus**: Improve API interface
 
-**Step 12 - Add New Feature Deletion**:
-1. TDD DeleteTaskUseCase
-2. Implement DeleteTaskUseCase, DeleteTaskInput, DeleteTaskService
-3. Revise console controller for delete command
+**Step 12 - Add New Feature Cancellation**:
+1. TDD CancelOrderUseCase
+2. Implement CancelOrderUseCase, CancelOrderInput, CancelOrderService
+3. Revise REST controller for cancel endpoint
 4. Refactor adapter package: add in/out packages
 5. Move controller to in, presenter and repository to out
 
-**Step 13 - Add New Feature View by Deadline**:
-1. TDD ViewTaskUseCase
-2. Implement ViewTaskUseCase, ViewTaskInput, ViewTaskOutput
-3. Create ViewTaskDto, ViewTaskService
-4. Revise console controller and tests
+**Step 13 - Add New Feature Order History**:
+1. TDD OrderHistoryUseCase
+2. Implement OrderHistoryUseCase, OrderHistoryInput, OrderHistoryOutput
+3. Create OrderHistoryDto, OrderHistoryService
+4. Revise REST controller and tests
 
 **Patterns Applied**:
 - Input/Output Port Naming Convention (in/out)
@@ -362,25 +358,22 @@ tw.teddysoft.tasks/
 
 ---
 
-### Step 14: Extract Console Controllers
+### Step 14: Extract API Handlers
 
-**Focus**: Decouple console controllers using executor pattern
+**Focus**: Decouple API handlers using executor pattern
 
 **Changes**:
-1. Define Request, Response, ConsoleController interfaces
-2. Create ToDoListCommands enum (commands mapping)
-3. Implement ConsoleControllerExecutor
+1. Define Request, Response, ApiController interfaces
+2. Create OrderCommands enum (commands mapping)
+3. Implement ApiControllerExecutor
 4. Extract individual controllers:
-   - AddProjectConsoleController
-   - AddTaskConsoleController
-   - CheckConsoleController
-   - SetDoneConsoleController
-   - DeleteConsoleController
-   - ShowConsoleController
-   - HelpConsoleController
-   - DeadlineConsoleController
-   - TodayConsoleController
-   - ErrorConsoleController
+   - AddCustomerApiController
+   - AddItemApiController
+   - RemoveItemApiController
+   - SubmitOrderApiController
+   - ShowOrderApiController
+   - OrderHistoryApiController
+   - ErrorApiController
 
 **Patterns Applied**:
 - Command Pattern
@@ -419,12 +412,12 @@ tw.teddysoft.tasks/
 
 ### Step 1-4
 ```
-ToDoList (monolith) → direct dependencies
+Order (monolith) → direct dependencies
 ```
 
 ### Step 5-6
 ```
-ToDoListConsoleController → UseCase → Service → Repository → ToDoList (Aggregate)
+OrderConsoleController → UseCase → Service → Repository → Order (Aggregate)
 ```
 
 ### Step 7-9
@@ -435,7 +428,7 @@ Presenter (out)
 
 ### Step 14
 ```
-ConsoleControllerExecutor → Request/Response → ConsoleController (in) → UseCase
+ApiControllerExecutor → Request/Response → ApiController (in) → UseCase
                                                               ↓
                                                   Presenter/Repository (out)
 ```

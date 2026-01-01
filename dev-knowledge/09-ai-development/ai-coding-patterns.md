@@ -34,7 +34,7 @@ All patterns are defined using a JSON-based specification format:
 | Aggregate | Event Sourcing, State-based | `.ai/tech-stacks/*/coding-standards/aggregate-standards.md` |
 | Repository | InMemory, Outbox, EventStore | `.ai/tech-stacks/*/coding-standards/repository-standards.md` |
 | Controller | REST API, Adapter | `.ai/prompts/controller-code-generation-prompt.md` |
-| Testing | ezSpec, Unit, Integration | `.ai/prompts/test-generation-prompt.md` |
+| Testing | BDD-style, Unit, Integration | `.ai/prompts/test-generation-prompt.md` |
 
 ---
 
@@ -257,8 +257,44 @@ flowchart TD
        │    Tests     │
        ├─────────────┐
       │   Unit Tests  │   ← Maximum (Domain logic, Use cases)
-      │  (ezSpec BDD) │
+      │  (BDD-style) │
       └─────────────┘
+```
+
+### Test Generation Patterns
+
+```typescript
+// ✅ GOOD - BDD-style test structure
+describe("CreateProductUseCase", () => {
+  let feature: Feature;
+  let useCase: CreateProductUseCase;
+
+  beforeAll(() => {
+    feature = new Feature("Create Product Use Case");
+    feature.initialize();
+  });
+
+  it("should create product with valid input", () => {
+    feature.newScenario("Successfully create a product with valid input")
+      .given("valid product creation input", env => {
+        const input = CreateProductInput.create();
+        input.productId = "prod-001";
+        input.name = "Test Product";
+        input.userId = "user-001";
+        env.set("input", input);
+      })
+      .when("the use case is executed", env => {
+        const input = env.get<CreateProductInput>("input");
+        const output = useCase.execute(input);
+        env.set("output", output);
+      })
+      .then("the product should be created successfully", env => {
+        const output = env.get<CqrsOutput>("output");
+        expect(output.isSuccessful()).toBe(true);
+      })
+      .execute();
+  });
+});
 ```
 
 ### Test Generation Patterns
@@ -305,7 +341,7 @@ class CreateProductUseCaseTest {
 | **Aggregate** | Event Sourcing, State-based | Domain entity patterns |
 | **Repository** | InMemory, Outbox, EventStore | Data access patterns |
 | **Adapter** | REST API, Message Handler | Integration patterns |
-| **Testing** | ezSpec, Unit, Integration | Test structure patterns |
+| **Testing** | BDD-style, Unit, Integration | Test structure patterns |
 
 ### Pattern Selection Guide
 
@@ -388,11 +424,49 @@ class CreateProductUseCaseTest {
        │    Tests     │
        ├─────────────┤
       │   Unit Tests  │   ← Maximum (Domain logic, Use cases)
-      │  (ezSpec BDD) │
+      │  (BDD-style) │
       └─────────────┘
 ```
 
-### ezSpec BDD Framework
+### BDD Testing Framework
+
+```typescript
+describe("CreateProductUseCase", () => {
+  let feature: Feature;
+  let useCase: CreateProductUseCase;
+  let publishedEvents: DomainEvent[];
+
+  beforeAll(() => {
+    feature = new Feature("Create Product Use Case");
+    feature.initialize();
+  });
+
+  it("should create product with valid input", () => {
+    feature.newScenario("Successfully create a product with valid input")
+      .given("valid product creation input", env => {
+        const input = CreateProductInput.create();
+        input.productId = "prod-001";
+        input.name = "Test Product";
+        input.userId = "user-001";
+        env.set("input", input);
+      })
+      .when("the use case is executed", env => {
+        const input = env.get<CreateProductInput>("input");
+        const output = useCase.execute(input);
+        env.set("output", output);
+      })
+      .then("the product should be created successfully", env => {
+        const output = env.get<CqrsOutput>("output");
+        expect(output.isSuccessful()).toBe(true);
+        expect(publishedEvents.length).toBe(1);
+        expect(publishedEvents[0]).toBeInstanceOf(ProductCreated);
+      })
+      .execute();
+  });
+});
+```
+
+### BDD Testing Framework
 
 ```java
 @EzFeature
