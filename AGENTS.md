@@ -1,7 +1,7 @@
 # AI-Assisted Development Repository AGENTS.md
 
-**Version:** 1.0  
-**Last Updated:** 2026-01-01  
+**Version:** 2.0
+**Last Updated:** 2026-01-01
 **Framework:** AI-Assisted Development with Domain-Driven Design
 
 ---
@@ -10,7 +10,73 @@
 
 This repository contains knowledge bases, templates, and session logs for building and improving AI-assisted development practices. It serves as both a working repository and a meta-framework for AI agent collaboration.
 
-**Purpose:** This document defines constraints for AI agents working on this repository. It references `dev-knowledge/` for universal patterns and adds repository-specific rules for managing documentation, templates, and session workflows.
+**Purpose:** This document defines constraints for AI agents working on this repository. It references `dev-knowledge/` for universal patterns and adds repository-specific rules.
+
+---
+
+## Core Rules 🔴
+
+**Critical rules that must never be violated.**
+
+### Git Operations
+
+| Symbol | Rule | Description |
+|--------|------|-------------|
+| 🔴 NEVER | Auto-commit | Always ask for user approval before committing |
+| ⚠️ MUST | Commit format | Follow conventional commits (see git-conventions.md) |
+
+### Git Push
+
+| Symbol | Rule | Description |
+|--------|------|-------------|
+| 💡 TIP | Recommend push | I can suggest git push after commit |
+| 🔴 NEVER | Execute push | I will never run git push for you |
+
+### Documentation Rules
+
+| Symbol | Rule | Description |
+|--------|------|-------------|
+| 🔴 NEVER | AGENTS.md validation | Always validate when creating/modifying AGENTS.md files |
+| 🔴 NEVER | Non-English docs | Use English only in all documentation |
+| 🔴 NEVER | Company names | Use generic examples, no company-specific content |
+| ⚠️ MUST | Pattern references | Reference `dev-knowledge/` for universal patterns |
+
+### General Behavior
+
+| Symbol | Rule | Description |
+|--------|------|-------------|
+| 🔴 NEVER | Project-specific rules | Never add project-specific rules to `dev-knowledge/` |
+| ⚠️ MUST | Session logging | Document decisions in session logs |
+| ✅ SHOULD | Full paths | Reference files with full paths: `dev-knowledge/04-coding-style/git-conventions.md` |
+
+### Rule Priority System
+
+| Symbol | Meaning | Violation Consequence |
+|--------|---------|----------------------|
+| 🔴 NEVER | Absolute prohibition | Workflow halts immediately |
+| ⚠️ MUST | Required action | Results considered invalid |
+| ✅ SHOULD | Strong recommendation | Suboptimal but not blocking |
+
+---
+
+## Commands ⚡
+
+**Predefined workflows. Always follow these patterns exactly.**
+
+### Git Commit Workflow
+
+Git commit is a command YOU use. I only help you execute it manually.
+
+1. Run `git status` and `git diff`
+2. Summarize changes for you
+3. Ask: "Ready to commit? (yes/no)"
+4. Wait for your explicit "yes"
+5. Run: `git commit -m "[type]([scope]): [subject]"` (I type it, you use it)
+6. Verify with `git status`
+
+**I will NEVER commit without your approval.**
+
+### AGENTS.md Creation/Modification Workflow
 
 ---
 
@@ -45,7 +111,7 @@ This is a meta-project focused on **knowledge management for AI-assisted softwar
 |-------|------------|-------|
 | Documentation | Markdown | Git-managed, universal format |
 | AI Agents | Multi-agent framework | See `dev-knowledge/09-ai-development/` |
-| Version Control | Git | See `04-coding-style/git-conventions.md` |
+| Version Control | Git | See `dev-knowledge/04-coding-style/git-conventions.md` |
 | Validation | AI prompts | `template/agents/agent-md-validator.md` |
 
 ---
@@ -96,7 +162,7 @@ session-[context]-[NNN].md   # Session logs
 
 ### Documentation Standards
 
-- ✅ Use English only (no Chinese/other languages)
+- ✅ Use English only
 - ✅ Reference `dev-knowledge/` for patterns
 - ✅ Use generic examples (no company names)
 - ✅ Follow `dev-knowledge/04-coding-style/` conventions
@@ -105,70 +171,35 @@ session-[context]-[NNN].md   # Session logs
 
 ---
 
-## Testing Requirements
-
-### Documentation Review
-
-| Check | Tool | Command |
-|-------|------|---------|
-| AGENTS.md validation | AI Prompt | Load `template/agents/agent-md-validator.md` |
-| Link validation | Manual | Verify all references exist |
-| Format consistency | Manual | Follow existing file patterns |
-
-### Review Process
-
-1. Load validation prompt: `template/agents/agent-md-validator.md`
-2. Run through checklist
-3. Fix any issues found
-4. Commit changes
-
----
-
-## Error Handling
-
-### Error Types
-
-| Error Type | Pattern | Resolution |
-|------------|---------|------------|
-| Missing reference | Link points to non-existent file | Create file or fix link |
-| Format inconsistency | Deviations from conventions | Align with `dev-knowledge/` |
-| Validation failure | AGENTS.md fails checklist | Fix missing sections |
-
----
-
 ## Git Workflow
 
-### Branch Naming
-
-| Type | Pattern | Example |
-|------|---------|---------|
-| Documentation | `docs/[topic]` | `docs/add-validation-prompt` |
-| Template | `template/[name]` | `template/add-agents-validator` |
-| Knowledge | `knowledge/[category]` | `knowledge/update-ddd-patterns` |
+**Summary only. Full rules in `dev-knowledge/04-coding-style/git-conventions.md`.**
 
 ### Commit Message Format
 
-Follow `dev-knowledge/04-coding-style/git-conventions.md`:
-
 ```
 [type]([scope]): [subject]
-
-[body - optional]
-
-[footer - optional]
 ```
 
-**Types:** feat, fix, docs, style, refactor, chore
+**Valid types:** feat, fix, docs, style, refactor, chore
 
-**Example:**
-```
-docs: add AGENTS.md validation prompt to template folder
+### Key Rules
 
-Add agent-md-validator.md with comprehensive checklist for
-validating AGENTS.md files against required sections and
-anti-patterns.
+- 🔴 NEVER commit without user approval
+- ⚠️ MUST use conventional commit format
+- ✅ SHOULD include ticket/reference number in footer
 
-Refs: #template-001
+### Common Commands
+
+```bash
+# Check status
+git status
+
+# View recent commits
+git log --oneline -5
+
+# Check diff
+git diff --stat
 ```
 
 ---
@@ -182,51 +213,31 @@ Refs: #template-001
 | @temp | All relevant docs | General assistance, commands |
 | @reviewer | `template/agents/agent-md-validator.md` | Validate AGENTS.md files |
 
+### Standard Workflow
+
+1. Read relevant docs (AGENTS.md, dev-knowledge/)
+2. Identify applicable rules from Core Rules section
+3. Plan approach using defined Commands workflows
+4. Execute with explicit user confirmations
+5. Verify against rules before proceeding
+
 ### Agent Constraints
 
 AI agents must:
 
 - ✅ Reference `dev-knowledge/` for universal patterns
-- ✅ Follow this AGENTS.md for repository rules
-- ✅ Use validation prompt when reviewing AGENTS.md files
+- ✅ Follow Core Rules with priority symbols
+- ✅ Use Commands section for defined workflows
 - ✅ Document decisions in session logs
-- ✅ Reference files with full paths: `[dev-knowledge/04-coding-style/git-conventions.md]`
-- ✅ Use `template/agents/agent-md-validator.md` for validation
+- ✅ Reference files with full paths
 
 AI agents must NOT:
 
-- ❌ **Never auto git commit** - Always wait for user approval
-- ❌ Skip validation when creating/modifying AGENTS.md
+- ❌ Auto-commit without approval
+- ❌ Skip AGENTS.md validation
 - ❌ Introduce project-specific rules in `dev-knowledge/`
 - ❌ Use company names in examples
 - ❌ Write documentation in non-English languages
-
-### Commands to Remember
-
-**Git Commands:**
-```bash
-# Check status
-git status
-
-# Stage changes
-git add [file/folder]
-
-# Commit with conventional message
-git commit -m "[type]([scope]): [description]"
-
-# View recent commits
-git log --oneline -5
-
-# Check diff
-git diff --stat
-```
-
-**Validation Commands:**
-```bash
-# Validate AGENTS.md (via AI agent)
-Load: template/agents/agent-md-validator.md
-Task: Validate AGENTS.md
-```
 
 ---
 
@@ -234,7 +245,7 @@ Task: Validate AGENTS.md
 
 ### Before Submitting Changes
 
-- [ ] AGENTS.md validated with `template/agents/agent-md-validator.md`
+- [ ] Git operations followed Commands workflow
 - [ ] Commit message follows conventional format
 - [ ] No project-specific names in examples
 - [ ] All references point to existing files
@@ -255,27 +266,11 @@ Task: Validate AGENTS.md
 
 A change is complete when:
 
-- [ ] Validation passes (`template/agents/agent-md-validator.md`)
+- [ ] Git workflow completed with user approvals
 - [ ] Commit message follows conventional format
 - [ ] No anti-patterns found (company names, non-English text)
 - [ ] All references verified
 - [ ] Changes committed (with user approval)
-
----
-
-## Validation Commands
-
-```bash
-# Validate AGENTS.md file
-Load: template/agents/agent-md-validator.md
-Task: Validate the AGENTS.md file
-
-# Check git status
-git status
-
-# View commit history
-git log --oneline -10
-```
 
 ---
 
@@ -284,7 +279,8 @@ git log --oneline -10
 - **dev-knowledge:** `/dev-knowledge/` - Universal patterns for AI agents
 - **Template:** `template/agents/AGENTS-template.md` - Create new AGENTS.md files
 - **Validation:** `template/agents/agent-md-validator.md` - Validate AGENTS.md files
-- **Git Conventions:** `dev-knowledge/04-coding-style/git-conventions.md` - Commit message standards
+- **Git Conventions:** `dev-knowledge/04-coding-style/git-conventions.md` - Full git rules
+- **Coding Style:** `dev-knowledge/04-coding-style/` - All coding conventions
 
 ---
 
