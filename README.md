@@ -1,13 +1,16 @@
-# AI Coding Prompts Repository
+# AI-Assisted Development Repository
 
 This repository contains documentation, research, and session logs related to AI-assisted development practices and software architecture patterns.
 
 ## Folder Structure
 
-- **ai-assisted-development** - Frameworks and methodologies for AI-assisted development
-- **doc** - Comprehensive documentation on development practices, patterns, and specifications
-- **ref** - Reference guidelines, constitutions, and structural documentation
-- **session-log** - Session logs documenting various AI-assisted development sessions
+| Folder | Purpose |
+|--------|---------|
+| `dev-knowledge/` | Universal knowledge base for AI agents (13 categories, 70 files) |
+| `doc/` | Original documentation and research materials |
+| `template/` | Project templates (AGENTS-template.md, validation prompts) |
+| `ref/` | Reference guidelines and structural documentation |
+| `session-log/` | Session logs from AI-assisted development sessions |
 
 ## Purpose
 
@@ -25,3 +28,10 @@ This repository serves as a knowledge base for:
 - Specification-Driven Development
 - Prompt Engineering for AI Agents
 - Vertical Slice Architecture
+- AI Agent Constraints (AGENTS.md)
+
+## Quick Links
+
+- **For AI Agents:** Read `dev-knowledge/AGENTS.md` first
+- **Creating Projects:** Use `template/agents/AGENTS-template.md`
+- **Validating AGENTS.md:** Load `template/agents/agent-md-validator.md`
