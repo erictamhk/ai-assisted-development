@@ -54,3 +54,24 @@ All human decisions are logged here with timestamp, context, and impact.
 - Clear workflow for approvals
 
 **Status:** APPROVED → Implemented
+
+---
+
+## [DECISION #004] | 2026-01-01 23:00:00 | Boss Directive
+
+**Context:** Clarifying Phase 3 workflow for generating 8 agent roles
+
+**Decision:**
+- Agent generation uses agent-role-template.md (separate from AGENTS-template.md)
+- Each agent goes through 3 sessions:
+  - Session 1: Define role (purpose + responsibilities)
+  - Session 2: Map knowledge (dev-knowledge files)
+  - Session 3: Generate agent (create definition + validate)
+- Orchestrator moves to Phase 4 (created with workflows)
+
+**Impact:**
+- Clear, step-by-step agent generation process
+- Strict Executor rules applied at each session
+- Better quality control
+
+**Status:** APPROVED → Ready for Step 1

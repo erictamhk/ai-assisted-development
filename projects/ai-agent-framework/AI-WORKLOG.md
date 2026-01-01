@@ -71,3 +71,31 @@ Complete trace of all AI agent actions.
 - projects/ai-agent-framework/AGENTS.md
 
 **Decision Logged:** DECISIONS.md #003
+
+---
+
+## 2026-01-01 23:00:00 | ORCHESTRATOR | Plan Phase 3 agent generation workflow
+
+**Input:** Boss request to think harder about Phase 3 plan
+**Output:** Defined clear agent generation workflow with 11 steps:
+- Step 1: Create agent-role-template.md
+- Step 2: Create KNOWLEDGE-MAPPING.md
+- Steps 3-11: Generate 8 agents (researcher through refactorer)
+
+Each agent follows 3-session workflow:
+- Session 1: Define role (purpose + responsibilities)
+- Session 2: Map knowledge (dev-knowledge files)
+- Session 3: Generate agent (create + validate)
+
+Updated PROGRESS.md and logged DECISION #004.
+
+**Metrics:**
+- Token usage: 5K
+- Duration: 3m
+
+**Files Changed:**
+- projects/ai-agent-framework/PROGRESS.md
+- projects/ai-agent-framework/DECISIONS.md
+- projects/ai-agent-framework/AI-WORKLOG.md
+
+**Decision Logged:** DECISIONS.md #004
