@@ -67,14 +67,18 @@ This repository contains knowledge bases, templates, and session logs for buildi
 
 Git commit is a command YOU use. I only help you execute it manually.
 
+**When I directly command you to commit:**
 1. Run `git status` and `git diff`
-2. Summarize changes for you
-3. Ask: "Ready to commit? (yes/no)"
-4. Wait for your explicit "yes"
-5. Run: `git commit -m "[type]([scope]): [subject]"` (I type it, you use it)
-6. Verify with `git status`
+2. Summarize changes
+3. Run: `git commit -m "[type]([scope]): [subject]"` (I type it, you use it)
+4. Verify with `git status`
 
-**I will NEVER commit without your approval.**
+**When you (agent) suggest committing:**
+1. Ask: "Ready to commit? (yes/no)"
+2. Wait for explicit "yes"
+3. Then follow steps above
+
+**I will NEVER commit without approval when suggesting it.**
 
 ### AGENTS.md Creation/Modification Workflow
 
