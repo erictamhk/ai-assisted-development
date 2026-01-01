@@ -23,7 +23,7 @@ This repository contains knowledge bases, templates, and session logs for buildi
 | Symbol | Rule | Description |
 |--------|------|-------------|
 | 🔴 NEVER | Auto-commit | Always ask for user approval before committing |
-| ⚠️ MUST | Commit format | Follow conventional commits (see git-conventions.md) |
+| ⚠️ MUST | Commit format | Follow conventional commits with scope and body (see git-conventions.md) |
 
 ### Git Push
 
@@ -70,8 +70,23 @@ Git commit is a command YOU use. I only help you execute it manually.
 **When I directly command you to commit:**
 1. Run `git status` and `git diff`
 2. Summarize changes
-3. Run: `git commit -m "[type]([scope]): [subject]"` (I type it, you use it)
+3. Run: `git commit -m "[type]([scope]): [subject]"` with optional body
 4. Verify with `git status`
+
+**Commit message format:**
+```
+[type]([scope]): [subject]
+
+[optional body explaining WHY]
+```
+
+**Example:**
+```
+feat(agent): add logging system with templates for AI agent framework
+
+Add audit trail capabilities with PROGRESS.md, DECISIONS.md, and AI-WORKLOG.md
+templates to enable complete traceability of AI-assisted development.
+```
 
 **When you (agent) suggest committing:**
 1. Ask: "Ready to commit? (yes/no)"
@@ -183,9 +198,13 @@ session-[context]-[NNN].md   # Session logs
 
 ```
 [type]([scope]): [subject]
+
+[optional body explaining WHY]
 ```
 
 **Valid types:** feat, fix, docs, style, refactor, chore
+
+**Common scopes:** agent, logging, docs, orchestrator
 
 ### Key Rules
 
