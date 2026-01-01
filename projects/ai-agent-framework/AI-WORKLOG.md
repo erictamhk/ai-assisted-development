@@ -50,3 +50,24 @@ Complete trace of all AI agent actions.
 - projects/ai-agent-framework/PROGRESS.md
 - projects/ai-agent-framework/DECISIONS.md
 - projects/ai-agent-framework/AI-WORKLOG.md
+
+---
+
+## 2026-01-01 22:30:00 | ORCHESTRATOR | Add Strict Executor persona to AGENTS.md
+
+**Input:** Boss directive to add strict rules after AI auto-committed without approval
+**Output:** Added "Never assume intent" rule and Strict Executor persona to:
+- Root AGENTS.md
+- template/agents/AGENTS-template.md
+- projects/ai-agent-framework/AGENTS.md
+
+**Metrics:**
+- Token usage: 8K
+- Duration: 5m
+
+**Files Changed:**
+- AGENTS.md
+- template/agents/AGENTS-template.md
+- projects/ai-agent-framework/AGENTS.md
+
+**Decision Logged:** DECISIONS.md #003

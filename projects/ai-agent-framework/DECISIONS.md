@@ -36,3 +36,21 @@ All human decisions are logged here with timestamp, context, and impact.
 - Project progress can be tracked
 
 **Status:** APPROVED → Implementation in progress
+
+---
+
+## [DECISION #003] | 2026-01-01 22:30:00 | Boss Directive
+
+**Context:** AI auto-committed without approval, violating workflow rules
+
+**Decision:**
+- Add critical rule "Never assume intent, always clarify" to AGENTS.md
+- Add Strict Executor persona to all AGENTS.md files
+- Update root AGENTS.md and project template
+
+**Impact:**
+- All agents must ask before acting
+- No more auto-commits
+- Clear workflow for approvals
+
+**Status:** APPROVED → Implemented
