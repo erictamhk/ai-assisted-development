@@ -1,5 +1,8 @@
 # How to Create an Agent Role
 
+**Version:** 1.1
+**Last Updated:** 2026-01-02
+
 A guide for using `agent-role-template.md` to define new AI agent roles.
 
 ---
@@ -29,10 +32,11 @@ Create a new agent role when you need a specialist that:
 
 Before creating an agent role, understand:
 
-1. **The Universal Agent Laws** - All agents must follow CLARIFY, FOLLOW PROCESS, PROTECT QUALITY
+1. **The Universal Agent Laws** - All agents must follow CLARIFY, FOLLOW PROCESS, PROTECT QUALITY, ENFORCE DISCIPLINE
 2. **dev-knowledge Structure** - 13 categories of engineering knowledge
 3. **Orchestrator Pattern** - Agents are specialists called by orchestrator
 4. **Output Artifacts** - Each agent delivers specific output types
+5. **Discipline System** - Hardened enforcement to prevent rule violations
 
 ---
 
@@ -111,6 +115,7 @@ CODER:
 ```
 
 **Step 2.4: Define Workflow**
+
 4-6 steps the agent follows:
 
 ```
@@ -120,50 +125,14 @@ RESEARCHER:
 3. Study → Read and understand patterns
 4. Research → External search for topic
 5. Synthesize → Combine knowledge + research
-6. Deliver → Markdown document with citations
+6. Deliver → Output to Orchestrator (goes to REVIEWER)
 
 CODER:
 1. Understand → Read specs, existing patterns
 2. Implement → Write code following patterns
 3. Test → Write/run tests
 4. Validate → Run lint/typecheck
-5. Deliver → Code files + tests
-```
-
-**Step 2.5: Specify Knowledge Access**
-Map relevant dev-knowledge/ categories:
-
-```
-RESEARCHER:
-CRITICAL: 09-ai-development/ (for research methods)
-ON-DEMAND: Any category based on research topic
-
-CODER:
-CRITICAL: 04-coding-style/
-CRITICAL: 05-testing/
-ON-DEMAND: 03-architecture/
-```
-
-**Step 2.6: Define Output Format**
-Template or format specification:
-
-```
-RESEARCHER:
-```markdown
-# Research: [Topic]
-
-## Summary
-[Brief overview]
-
-## Findings
-1. [Finding with citation]
-
-## Recommendations
-- [Actionable recommendation]
-
-## Sources
-- [Source 1]
-```
+5. Deliver → Code files + tests to Orchestrator (goes to REVIEWER)
 ```
 
 ---
@@ -178,12 +147,21 @@ RESEARCHER:
 - [ ] Workflow has 4-6 steps
 - [ ] Knowledge access is mapped
 - [ ] Output format has template
+- [ ] Output goes to Orchestrator (not human)
 
 **Step 3.2: Review Against Universal Laws**
 
 - [ ] Agent can CLARIFY (ask questions when uncertain)
 - [ ] Agent can FOLLOW PROCESS (has defined workflow)
 - [ ] Agent can PROTECT QUALITY (accesses knowledge, validates)
+- [ ] Agent can ENFORCE DISCIPLINE (follows Pre-Action Checkpoint, Approval Gate)
+
+**Step 3.3: Review Against Quality Gate Pattern**
+
+- [ ] Agent outputs to Orchestrator (not human)
+- [ ] REVIEWER is next step after agent
+- [ ] Agent can receive BAD feedback and redo
+- [ ] Agent understands: Human only sees GOOD work
 
 **Step 3.3: Peer Review**
 
@@ -306,6 +284,8 @@ Constraints:
 - [x] Follows CLARIFY law
 - [x] Follows FOLLOW PROCESS law
 - [x] Follows PROTECT QUALITY law
+- [x] Follows ENFORCE DISCIPLINE law
+- [x] Outputs to Orchestrator (quality gate pattern)
 
 ---
 
@@ -358,6 +338,82 @@ Update `projects/ai-agent-framework/KNOWLEDGE-MAPPING.md`.
 | Missing knowledge access | Agent doesn't know where to find info | Map dev-knowledge/ categories |
 | Workflow is too simple | Agent can't complete work | 4-6 steps minimum |
 | Constraints are empty | Agent may violate rules | Add 3-5 constraints |
+| Skip discipline check | Agent may violate rules without stopping | Enforce Pre-Action Checkpoint |
+| Assume approval given | Agent may skip approval step | Require explicit "yes" before DONE |
+| No self-audit trail | Agent may act without verifying | Log approval status before acting |
+| Output directly to human | Skip REVIEWER quality gate | Output to Orchestrator always |
+| Deliver BAD work | REVIEWER must catch issues | Human only sees GOOD work |
+
+---
+
+## Discipline System Integration
+
+### The Four Laws (Including Discipline)
+
+Every agent must be designed to follow these laws:
+
+```
+LAW 1: CLARIFY - Never assume intent. Always ask for clarification.
+LAW 2: FOLLOW PROCESS - Always use the defined workflow.
+LAW 3: PROTECT QUALITY - Never skip rules, checks, or quality gates.
+LAW 4: ENFORCE DISCIPLINE - Hardened enforcement prevents violations.
+```
+
+### Pre-Action Checkpoint Design
+
+When defining an agent's workflow, identify which steps require approval:
+
+| Step Type | Requires Approval? | Example |
+|-----------|-------------------|---------|
+| Create file | ✅ YES | "Is this file approved?" |
+| Mark DONE | ✅ YES | "Is this task approved?" |
+| Commit code | ✅ YES | "Ready to commit?" |
+| Decide for boss | ✅ YES | "Should I proceed with X?" |
+| Read/grep | ❌ NO | No approval needed |
+| Ask question | ❌ NO | No approval needed |
+
+### Approval Gate in Workflow
+
+Each agent's workflow must include:
+
+```
+[Step N] → [Approval Gate if required] → [Step N+1]
+
+Example:
+3. Implement code → Ask: "Is this implementation approved?" → 4. Write tests
+```
+
+### Self-Audit Trail Pattern
+
+Agent must log before each action:
+
+```
+"[ACTION] - Requires approval? [Y/N] - Approved? [Y/N]"
+```
+
+### Rule Violation Protocol
+
+Every agent must know:
+
+```
+IF VIOLATION:
+1. HARD STOP immediately
+2. Acknowledge: "I violated [rule]. How would you like me to proceed?"
+3. Wait for correction
+4. Cannot continue until resolved
+```
+
+### Common Approval Triggers (Per Agent)
+
+Define which actions your agent must get approval for:
+
+| Action | Your Agent Requires Approval? |
+|--------|------------------------------|
+| Create deliverable | ✅ YES / ❌ NO |
+| Mark task DONE | ✅ YES / ❌ NO |
+| Update progress | ✅ YES / ❌ NO |
+| Decide without asking | ✅ YES / ❌ NO |
+| Skip validation | ✅ YES / ❌ NO |
 
 ---
 
@@ -365,8 +421,9 @@ Update `projects/ai-agent-framework/KNOWLEDGE-MAPPING.md`.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1 | 2026-01-02 | Added ENFORCE DISCIPLINE law, discipline system checks |
 | 1.0 | 2026-01-02 | Initial guide |
 
 ---
 
-**Guide Version:** 1.0
+**Guide Version:** 1.1

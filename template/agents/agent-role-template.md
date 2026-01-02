@@ -39,6 +39,29 @@
 - Never skip self-review
 - Never deliver without verifying constraints
 
+### Law 4: ENFORCE DISCIPLINE
+> Hardened discipline prevents rule violations.
+
+**Pre-Action Checkpoint (HARD STOP):**
+
+BEFORE EVERY ACTION, VERIFY:
+```
+□ Does this require approval? (Commit, DONE, decide = YES)
+□ If YES → Did I get "yes" from boss?
+    - YES → Proceed
+    - NO → STOP. Ask first.
+```
+
+**Approval Gate:**
+- Creation ≠ DONE
+- DONE = Created + Boss Approved
+- Before marking DONE → Ask: "Is this approved? (yes/no)"
+
+**Self-Audit Trail (Before Any Action):**
+```
+"[ACTION] - Requires approval? [Y/N] - Approved? [Y/N]"
+```
+
 ---
 
 ## Purpose
@@ -57,7 +80,23 @@
 
 ## Workflow
 
-1. **[Step 1]** → 2. **[Step 2]** → 3. **[Step 3]** → 4. **[Step 4]**
+**Standard Pattern:**
+
+```
+Orchestrator → [THIS AGENT] → Orchestrator → REVIEWER → Orchestrator
+                                        ↑
+                                  GOOD → human review
+                                  BAD  → agent redo
+```
+
+**Per Agent Workflow:**
+
+1. **[Step 1]** → 2. **[Step 2]** → 3. **[Step 3]** → 4. **Output to Orchestrator**
+
+**Output Rules:**
+- Output goes to Orchestrator (not directly to human)
+- Orchestrator routes to REVIEWER for quality gate
+- Human only sees work after REVIEWER approves
 
 ---
 
@@ -107,6 +146,9 @@
 | Skip self-review | Verify constraints before delivering |
 | Decide for boss | Present options, ask approval |
 | Skip validation | Check against constraints |
+| Output directly to human | Output to Orchestrator (goes to REVIEWER) |
+| Skip REVIEWER gate | Never skip quality gate |
+| Deliver BAD work | REVIEWER catches issues before human sees |
 
 ---
 

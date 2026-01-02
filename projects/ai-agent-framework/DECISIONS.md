@@ -57,21 +57,27 @@ All human decisions are logged here with timestamp, context, and impact.
 
 ---
 
-## [DECISION #004] | 2026-01-01 23:00:00 | Boss Directive
+## [DECISION #005] | 2026-01-02 01:30:00 | Architecture Approval
 
-**Context:** Clarifying Phase 3 workflow for generating 8 agent roles
+**Context:** Defining the two-mode agent workflow and quality gate pattern
 
 **Decision:**
-- Agent generation uses agent-role-template.md (separate from AGENTS-template.md)
-- Each agent goes through 3 sessions:
-  - Session 1: Define role (purpose + responsibilities)
-  - Session 2: Map knowledge (dev-knowledge files)
-  - Session 3: Generate agent (create definition + validate)
-- Orchestrator moves to Phase 4 (created with workflows)
+- Simple role agent workflow: Input query → role agent → output work
+- Orchestrator only dispatches agents (no quality judgment)
+- Quality gate pattern: Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator → Human
+- REVIEWER catches issues, agent redoes if BAD
+- Human only sees work after REVIEWER says GOOD
+- REVIEWER uses different POV to catch hallucinations/gaps
+- Workflow phases:
+  - Phase 1: Build agents, human direct review first
+  - Phase 2: Integrate orchestrator dispatcher
+  - Phase 3: Orchestrator grows, human approves final only
 
 **Impact:**
-- Clear, step-by-step agent generation process
-- Strict Executor rules applied at each session
-- Better quality control
+- Clear separation: Orchestrator = dispatcher, REVIEWER = quality gate, Human = final approval
+- All agents output to Orchestrator (goes to REVIEWER)
+- REVIEWER reports GOOD/BAD to Orchestrator
+- Orchestrator delivers feedback to agent or human based on review result
+- Human never sees BAD work
 
-**Status:** APPROVED → Ready for Step 1
+**Status:** APPROVED → Update all templates and mappings
