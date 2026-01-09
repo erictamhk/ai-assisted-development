@@ -32,7 +32,7 @@
 | 3 | Generate researcher skill | ✅ DONE |
 | 4 | Generate expert-listener skill | ✅ DONE |
 | 5 | Generate clarifier skill | ✅ DONE |
-| 6 | Generate architect skill | ⏳ PENDING |
+| 6 | Generate architect skill | ✅ DONE |
 | 7 | Generate planner skill | ⏳ PENDING |
 | 8 | Generate coder skill | ⏳ PENDING |
 | 9 | Generate reviewer skill | ⏳ PENDING |
@@ -96,7 +96,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 
 | Metric | Value |
 |--------|-------|
-| Files Created | 12 |
+| Files Created | 14 |
 | Templates | 4 |
 | Documentation | 5 |
 | Decisions Logged | 5 |
@@ -110,7 +110,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 ---
 ## Next Action
 
-- Generate architect skill (Step 6 of Phase 3)
+- Generate planner skill (Step 7 of Phase 3)
 
 ---
 
