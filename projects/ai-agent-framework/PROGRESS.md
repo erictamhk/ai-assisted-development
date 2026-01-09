@@ -29,7 +29,7 @@
 |------|------|--------|
 | 1 | Create agent-role-template.md | ✅ DONE |
 | 2 | Create KNOWLEDGE-MAPPING.md | ✅ DONE |
-| 3 | Generate researcher skill | ⏳ PENDING |
+| 3 | Generate researcher skill | ✅ DONE |
 | 4 | Generate expert-listener skill | ⏳ PENDING |
 | 5 | Generate clarifier skill | ⏳ PENDING |
 | 6 | Generate architect skill | ⏳ PENDING |
@@ -110,7 +110,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 ---
 ## Next Action
 
-- Generate researcher skill (Step 3 of Phase 3)
+- Generate expert-listener skill (Step 4 of Phase 3)
 
 ---
 
