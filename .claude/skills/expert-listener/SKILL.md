@@ -75,10 +75,11 @@ BEFORE EVERY SESSION, VERIFY:
 2. **Domain Storytelling** - Capture workflows using narrative structure (Characters → Setting → Plot → Resolution)
 3. **Example Mapping** - Facilitate with blue (rules), green (examples), yellow (questions), red (issues) cards
 4. **Document Domain Vocabulary** - SOURCE: Capture and document ubiquitous language terms for CLARIFIER and ARCHITECT
-5. **Impact Mapping** - Create Goal → Actor → Impact → Deliverable trees
-6. **Tacit Knowledge Extraction** - Surface implicit domain knowledge into explicit documentation
-7. **Question Formulation** - Ask powerful questions to uncover requirements and edge cases
-8. **Session Documentation** - Document findings in structured formats for development
+5. **Identify Forces** - Surface constraints and pressures (security vs usability, speed vs cost) during discovery for ARCHITECT to resolve
+6. **Impact Mapping** - Create Goal → Actor → Impact → Deliverable trees
+7. **Tacit Knowledge Extraction** - Surface implicit domain knowledge into explicit documentation
+8. **Question Formulation** - Ask powerful questions to uncover requirements and edge cases
+9. **Session Documentation** - Document findings in structured formats for development
 
 ---
 
@@ -243,6 +244,12 @@ DELIVERABLE → What do we need to build?
 |------|------------|
 | [Term] | [Definition] |
 
+### Forces Identified
+| Force | Description | Impact on Design |
+|-------|-------------|------------------|
+| [e.g., Security vs Usability] | [Description] | [How it affects implementation] |
+| [e.g., Speed vs Cost] | [Description] | [How it affects implementation] |
+
 ### Business Rules
 1. [Rule]
 2. [Rule]
@@ -387,7 +394,7 @@ DELIVERABLE → What do we need to build?
 
 **Ubiquitous Language Flow:**
 ```
-EXPERT-LISTENER (SOURCE) → CLARIFIER (Owner/Validate) → ARCHITECT (Enforce)
+EXPERT-LISTENER (SOURCE: Vocabulary + Forces) → CLARIFIER (Owner: Validate) → ARCHITECT (Enforce)
 ```
 
 ---
@@ -396,6 +403,7 @@ EXPERT-LISTENER (SOURCE) → CLARIFIER (Owner/Validate) → ARCHITECT (Enforce)
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.2 | 2026-01-09 | Add Identify Forces capability and Forces section in output format |
 | 1.1 | 2026-01-09 | Add Document Domain Vocabulary capability (SOURCE of ubiquitous language) |
 | 1.0 | 2026-01-09 | Initial expert-listener skill |
 

@@ -9,11 +9,11 @@ metadata:
   version: "1.0"
 ---
 
-## Skill Overview
+# Clarifier Skill
 
-**Purpose:** Bridge the gap between stakeholder intent and developer-ready specifications by systematically uncovering ambiguity, edge cases, and implicit assumptions.
+**Purpose:** Bridge the gap between stakeholder intent and developer-ready specifications by systematically uncovering ambiguity, edge cases, implicit assumptions, and forces.
 
-**What this skill delivers:** Structured specification documents with verified examples, acceptance criteria, and identified boundaries
+**What this skill delivers:** Structured specification documents with verified examples, acceptance criteria, identified boundaries, and documented forces for ARCHITECT to resolve
 
 **When to use:** When stakeholders provide vague requirements, high-level goals, or unclear problem statements that need concrete, testable specifications
 
@@ -91,6 +91,7 @@ BEFORE EVERY ACTION, VERIFY:
 - Feature descriptions lack concrete examples
 - Business goals are unclear or not connected to features
 - Edge cases are not addressed
+- Forces/constraints need documentation for ARCHITECT
 
 **Don't use when:**
 - Requirements are already precise and testable
@@ -117,7 +118,8 @@ Orchestrator → CLARIFIER → Orchestrator → REVIEWER → Orchestrator
 3. **Conduct Discovery** → Ask targeted questions to resolve ambiguities
 4. **Structure Specifications** → Organize findings into formal specifications
 5. **Validate with Examples** → Ensure specifications can be tested
-6. **Output to Orchestrator** → Deliver structured document
+6. **Document Forces** → Record constraints and pressures for ARCHITECT
+7. **Output to Orchestrator** → Deliver structured document
 
 **Output Rules:**
 - Output goes to Orchestrator (not directly to human)
@@ -228,6 +230,7 @@ Deliver structured specification documents that connect stakeholder intent to de
 4. **Never skip boundary definition** - Always clarify in-scope vs out-of-scope
 5. **Never skip stakeholder goal mapping** - Connect features to business value
 6. **Never deliver untested specifications** - Walk through examples before outputting
+7. **Never skip force identification** - Document constraints for ARCHITECT to resolve
 
 ---
 
@@ -247,6 +250,7 @@ Deliver structured specification documents that connect stakeholder intent to de
 | Accept "fast/efficient/user-friendly" without definition | Ask "What does [term] mean concretely?" |
 | Skip edge cases | Systematically explore boundary conditions |
 | Skip scope boundaries | Always ask "What's NOT included?" |
+| Skip forces | Always document constraints for ARCHITECT |
 
 ---
 
@@ -261,9 +265,10 @@ Deliver structured specification documents that connect stakeholder intent to de
 2. Ask: "What does 'reliable' mean? (99.9% uptime? retry logic?)"
 3. Ask: "What events trigger notifications?"
 4. Ask: "What channels? (email, push, SMS?)"
-5. Ask: "What's NOT included? (mobile app push?)")
+5. Ask: "What's NOT included? (mobile app push?)"
+6. Identify forces: "Speed vs Reliability tradeoff?", "Cost vs Reliability?"
 
-**Output:** Structured specification with concrete requirements
+**Output:** Structured specification with concrete requirements and documented forces
 
 ### Example 2: Ambiguous Business Rule
 
@@ -274,8 +279,9 @@ Deliver structured specification documents that connect stakeholder intent to de
 2. Clarify: "What about logged-in users with incomplete profiles?"
 3. Clarify: "Are there any exceptions (e.g., promotional items)?"
 4. Map to examples: Walk through specific user journeys
+5. Identify forces: "Security vs User Experience?"
 
-**Output:** Clear acceptance criteria with examples for each scenario
+**Output:** Clear acceptance criteria with examples for each scenario and forces documented
 
 ### Example 3: Missing Edge Cases
 
@@ -286,8 +292,9 @@ Deliver structured specification documents that connect stakeholder intent to de
 2. Identify missing: "What if payment fails mid-process?"
 3. Identify missing: "What's the timeout behavior?"
 4. Identify missing: "Can users checkout with empty cart?"
+5. Identify forces: "Data Consistency vs Performance?", "Security vs Convenience?"
 
-**Output:** Comprehensive edge case documentation
+**Output:** Comprehensive edge case documentation and forces for ARCHITECT
 
 ---
 
@@ -311,9 +318,9 @@ EXPERT-LISTENER (Identify Forces) → CLARIFIER (Document Forces) → ARCHITECT 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.1 | 2026-01-09 | Add Identify Forces capability and Forces section in output format |
-| 1.0 | 2026-01-09 | Initial CLARIFIER skill |
+| 1.0 | 2026-01-09 | Initial clarifier skill |
 
 ---
 
 **Skill Version:** 1.0
-**For:** OpenCode, Claude Code, AGENTS.md compatibility
+**Compatibility:** opencode, claude-code, agents.md
