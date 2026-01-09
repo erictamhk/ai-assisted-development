@@ -31,7 +31,7 @@
 | 2 | Create KNOWLEDGE-MAPPING.md | ✅ DONE |
 | 3 | Generate researcher skill | ✅ DONE |
 | 4 | Generate expert-listener skill | ✅ DONE |
-| 5 | Generate clarifier skill | ⏳ PENDING |
+| 5 | Generate clarifier skill | ✅ DONE |
 | 6 | Generate architect skill | ⏳ PENDING |
 | 7 | Generate planner skill | ⏳ PENDING |
 | 8 | Generate coder skill | ⏳ PENDING |
@@ -96,7 +96,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 
 | Metric | Value |
 |--------|-------|
-| Files Created | 11 |
+| Files Created | 12 |
 | Templates | 4 |
 | Documentation | 5 |
 | Decisions Logged | 5 |
@@ -110,7 +110,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 ---
 ## Next Action
 
-- Generate clarifier skill (Step 5 of Phase 3)
+- Generate architect skill (Step 6 of Phase 3)
 
 ---
 
