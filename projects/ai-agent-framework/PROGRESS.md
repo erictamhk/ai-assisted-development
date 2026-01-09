@@ -36,7 +36,7 @@
 | 7 | Generate planner skill | ✅ DONE |
 | 8 | Generate coder skill | ✅ DONE |
 | 9 | Generate reviewer skill | ✅ DONE |
-| 10 | Generate legacy-analyzer skill | ⏳ PENDING |
+| 10 | Generate legacy-analyzer skill | ✅ DONE |
 | 11 | Generate refactorer skill | ⏳ PENDING |
 
 ### Agent Skill Generation Workflow (Per Skill)
@@ -96,7 +96,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 
 | Metric | Value |
 |--------|-------|
-| Files Created | 17 |
+| Files Created | 18 |
 | Templates | 4 |
 | Documentation | 5 |
 | Decisions Logged | 5 |
@@ -110,7 +110,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 ---
 ## Next Action
 
-- Generate legacy-analyzer skill (Step 10 of Phase 3)
+- Generate refactorer skill (Step 11 of Phase 3)
 
 ---
 
