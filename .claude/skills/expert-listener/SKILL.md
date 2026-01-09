@@ -11,11 +11,11 @@ metadata:
 
 # Expert Listener Skill
 
-**Purpose:** Facilitate collaborative domain discovery sessions to capture tacit knowledge through structured techniques
+**Purpose:** Facilitate collaborative domain discovery sessions to capture tacit knowledge and domain vocabulary for ubiquitous language
 
-**What this skill delivers:** Documented domain knowledge, discovered requirements, and structured findings ready for implementation
+**What this skill delivers:** Documented domain knowledge, discovered requirements, structured findings, and domain vocabulary ready for CLARIFIER and ARCHITECT
 
-**When to use:** When exploring new domains, gathering requirements, or uncovering implicit knowledge from domain experts
+**When to use:** When exploring new domains, gathering requirements, uncovering implicit knowledge, or capturing domain vocabulary for ubiquitous language
 
 ---
 
@@ -74,10 +74,11 @@ BEFORE EVERY SESSION, VERIFY:
 1. **Event Storming Facilitation** - Run sessions with orange (events), blue (commands), yellow (aggregates), purple (policies), red (hotspots) stickies
 2. **Domain Storytelling** - Capture workflows using narrative structure (Characters → Setting → Plot → Resolution)
 3. **Example Mapping** - Facilitate with blue (rules), green (examples), yellow (questions), red (issues) cards
-4. **Impact Mapping** - Create Goal → Actor → Impact → Deliverable trees
-5. **Tacit Knowledge Extraction** - Surface implicit domain knowledge into explicit documentation
-6. **Question Formulation** - Ask powerful questions to uncover requirements and edge cases
-7. **Session Documentation** - Document findings in structured formats for development
+4. **Document Domain Vocabulary** - SOURCE: Capture and document ubiquitous language terms for CLARIFIER and ARCHITECT
+5. **Impact Mapping** - Create Goal → Actor → Impact → Deliverable trees
+6. **Tacit Knowledge Extraction** - Surface implicit domain knowledge into explicit documentation
+7. **Question Formulation** - Ask powerful questions to uncover requirements and edge cases
+8. **Session Documentation** - Document findings in structured formats for development
 
 ---
 
@@ -237,7 +238,7 @@ DELIVERABLE → What do we need to build?
 
 ## Domain Knowledge Captured
 
-### Terminology
+### Ubiquitous Language (SOURCE)
 | Term | Definition |
 |------|------------|
 | [Term] | [Definition] |
@@ -249,6 +250,8 @@ DELIVERABLE → What do we need to build?
 ### Discovered Requirements
 1. [Requirement]
 2. [Requirement]
+
+**Note:** Domain vocabulary captured here is the SOURCE for CLARIFIER's ubiquitous language validation and ARCHITECT's domain model enforcement.
 
 ## Questions for Follow-Up
 1. [Question]
@@ -377,10 +380,15 @@ DELIVERABLE → What do we need to build?
 
 ## Related Skills
 
-- **clarifier** - Uses findings for requirements transformation
-- **architect** - Uses domain model for system design
+- **clarifier** - Uses findings and domain vocabulary for requirements transformation
+- **architect** - Uses domain model and vocabulary for system design
 - **planner** - Uses deliverables for task breakdown
 - **researcher** - May use techniques for knowledge gathering
+
+**Ubiquitous Language Flow:**
+```
+EXPERT-LISTENER (SOURCE) → CLARIFIER (Owner/Validate) → ARCHITECT (Enforce)
+```
 
 ---
 
@@ -388,6 +396,7 @@ DELIVERABLE → What do we need to build?
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1 | 2026-01-09 | Add Document Domain Vocabulary capability (SOURCE of ubiquitous language) |
 | 1.0 | 2026-01-09 | Initial expert-listener skill |
 
 ---
