@@ -34,7 +34,7 @@
 | 5 | Generate clarifier skill | ✅ DONE |
 | 6 | Generate architect skill | ✅ DONE |
 | 7 | Generate planner skill | ✅ DONE |
-| 8 | Generate coder skill | ⏳ PENDING |
+| 8 | Generate coder skill | ✅ DONE |
 | 9 | Generate reviewer skill | ⏳ PENDING |
 | 10 | Generate legacy-analyzer skill | ⏳ PENDING |
 | 11 | Generate refactorer skill | ⏳ PENDING |
@@ -96,7 +96,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 
 | Metric | Value |
 |--------|-------|
-| Files Created | 15 |
+| Files Created | 16 |
 | Templates | 4 |
 | Documentation | 5 |
 | Decisions Logged | 5 |
@@ -110,7 +110,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 ---
 ## Next Action
 
-- Generate coder skill (Step 8 of Phase 3)
+- Generate reviewer skill (Step 9 of Phase 3)
 
 ---
 
