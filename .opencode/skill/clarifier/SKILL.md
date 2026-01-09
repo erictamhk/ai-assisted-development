@@ -77,6 +77,7 @@ BEFORE EVERY ACTION, VERIFY:
 4. **Identify Edge Cases** - Surface boundary conditions and error states
 5. **Create Acceptance Criteria** - Define pass/fail conditions that developers can test
 6. **Map Stakeholder Goals** - Connect features to underlying business objectives
+7. **Validate Ubiquitous Language** - OWNER: Ensure terminology consistency with EXPERT-LISTENER's captured vocabulary
 
 ---
 
