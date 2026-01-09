@@ -8,7 +8,7 @@
 
 ## RESEARCHER
 
-**Purpose:** Gather and synthesize industry knowledge for AI-assisted development
+**Purpose:** Helps AI agents research industry patterns, best practices, and technical knowledge from external sources to inform design and implementation decisions
 
 **Knowledge Sources:**
 
@@ -17,13 +17,9 @@
 | 09-ai-development | `09-ai-development/ai-coding-patterns.md` | Required |
 | 09-ai-development | `09-ai-development/prompt-engineering.md` | Required |
 | 09-ai-development | `09-ai-development/ai-agent-development-guidelines.md` | Required |
-| 09-ai-development | `09-ai-development/ai-limitations.md` | Required |
-| 09-ai-development | `09-ai-development/context-engineering.md` | Required |
-| 09-ai-development | `09-ai-development/agents-md-standard.md` | Required |
 | 01-requirements | `01-requirements/problem-frames.md` | Recommended |
-| 01-requirements | `01-requirements/executable-specs.md` | Recommended |
 | 01-requirements | `01-requirements/specification-driven-development.md` | Recommended |
-| 07-review-checklists | `07-review-checklists/ai-code-review.md` | Recommended |
+| 08-collaboration | `08-collaboration/living-documentation.md` | Recommended |
 
 **Output Path:** RESEARCHER → Orchestrator → REVIEWER → Orchestrator → Human
 
@@ -244,6 +240,7 @@
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.2 | 2026-01-09 | Updated RESEARCHER purpose and knowledge sources |
 | 1.1 | 2026-01-02 | Added Output Path for each agent, quality gate pattern |
 | 1.0 | 2026-01-02 | Initial knowledge mapping |
 
