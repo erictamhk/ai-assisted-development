@@ -1,16 +1,32 @@
-# Universal Agent Role Template
+# Universal Agent Skill Template
 
-**Version:** 1.0
-**Last Updated:** 2026-01-02
-**Template For:** [AGENT_NAME]
+**Version:** 2.0
+**Last Updated:** 2026-01-09
+**Template For:** [SKILL_NAME]
+**Compatibility:** opencode, claude-code, agents.md
 
 ---
 
-## R-G-C
+```yaml
+---
+name: [skill-name]
+description: [Brief description of what this skill does - 1-1024 chars]
+license: MIT
+compatibility: opencode, claude-code
+metadata:
+  audience: [e.g., developers, maintainers]
+  workflow: [e.g., development, research, review]
+  version: "1.0"
+---
+```
 
-**Role:** [What this agent IS - specialist title]
-**Goal:** [What this agent DELIVERS - output artifact]
-**Constraints:** [What this agent MUST NOT do]
+## Skill Overview
+
+**Purpose:** [One sentence explaining why this skill exists]
+
+**What this skill delivers:** [Output artifact or result]
+
+**When to use:** [When to invoke this skill]
 
 ---
 
@@ -64,17 +80,23 @@ BEFORE EVERY ACTION, VERIFY:
 
 ---
 
-## Purpose
+## What I Do
 
-[Brief statement: Why this agent exists - one sentence]
+[List of capabilities this skill provides]
+
+1. [Capability 1]
+2. [Capability 2]
+3. [Capability 3]
 
 ---
 
-## Responsibilities
+## When to Use Me
 
-1. [Primary responsibility]
-2. [Primary responsibility]
-3. [Primary responsibility]
+[Guidance on when to invoke this skill]
+
+- Use when: [scenario 1]
+- Use when: [scenario 2]
+- Don't use when: [contraindications]
 
 ---
 
@@ -83,13 +105,13 @@ BEFORE EVERY ACTION, VERIFY:
 **Standard Pattern:**
 
 ```
-Orchestrator → [THIS AGENT] → Orchestrator → REVIEWER → Orchestrator
-                                        ↑
-                                  GOOD → human review
-                                  BAD  → agent redo
+Orchestrator → [THIS SKILL] → Orchestrator → REVIEWER → Orchestrator
+                                          ↑
+                                    GOOD → human review
+                                    BAD  → skill redo
 ```
 
-**Per Agent Workflow:**
+**Per Skill Workflow:**
 
 1. **[Step 1]** → 2. **[Step 2]** → 3. **[Step 3]** → 4. **Output to Orchestrator**
 
@@ -136,6 +158,16 @@ Orchestrator → [THIS AGENT] → Orchestrator → REVIEWER → Orchestrator
 
 ---
 
+## Constraints
+
+[What this skill MUST NOT do]
+
+1. [Constraint 1]
+2. [Constraint 2]
+3. [Constraint 3]
+
+---
+
 ## Anti-Patterns (Never Do These)
 
 | Anti-Pattern | Instead |
@@ -152,12 +184,47 @@ Orchestrator → [THIS AGENT] → Orchestrator → REVIEWER → Orchestrator
 
 ---
 
+## Examples
+
+### Example 1: [Title]
+
+[Description of the task]
+
+```[language]
+[Code example]
+```
+
+**Result:** [What this produces]
+
+### Example 2: [Title]
+
+[Description of the task]
+
+```[language]
+[Code example]
+```
+
+**Result:** [What this produces]
+
+---
+
+## Related Skills
+
+[Other skills that work well with this one]
+
+- [Skill 1] - [How they work together]
+- [Skill 2] - [How they work together]
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | 2026-01-02 | Initial template with Three Agent Laws |
+| 1.0 | 2026-01-02 | Initial agent role template |
+| 2.0 | 2026-01-09 | Updated to Agent Skill format (SKILL.md) |
 
 ---
 
-**Template Version:** 1.0
+**Template Version:** 2.0
+**For:** OpenCode, Claude Code, AGENTS.md compatibility
