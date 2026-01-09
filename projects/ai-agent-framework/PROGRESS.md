@@ -1,6 +1,6 @@
 # AI Agent Framework PROGRESS
 
-**Last Updated:** 2026-01-02 01:00:00
+**Last Updated:** 2026-01-09 04:02:00
 **Status:** 22% COMPLETE
 
 ---
@@ -13,13 +13,13 @@
 | Strict Executor Rules | ✅ DONE | N/A | Critical rules added |
 | Discipline System | ✅ DONE | N/A | Hardened enforcement added |
 | Quality Gate Pattern | ✅ DONE | N/A | REVIEWER workflow defined |
-| Agent Framework | 🔄 IN PROGRESS | 12% | Phase 3: 9 agents + Quality Gate |
+| Agent Framework | 🔄 IN PROGRESS | 12% | Phase 3: 9 Agent Skills + Quality Gate |
 | Orchestration | ⏳ PENDING | 0% | Phase 4: orchestrator + workflows |
 | Tool Integrations | ⏳ PENDING | 0% | Phase 5: OpenCode, Claude, etc. |
 
 ---
 
-## Phase 3: Generate 9 Agent Roles
+## Phase 3: Generate 9 Agent Skills
 
 **Status:** 0% COMPLETE
 
@@ -29,21 +29,21 @@
 |------|------|--------|
 | 1 | Create agent-role-template.md | ✅ DONE |
 | 2 | Create KNOWLEDGE-MAPPING.md | ✅ DONE |
-| 3 | Generate researcher | ⏳ PENDING |
-| 4 | Generate expert-listener | ⏳ PENDING |
-| 5 | Generate clarifier | ⏳ PENDING |
-| 6 | Generate architect | ⏳ PENDING |
-| 7 | Generate planner | ⏳ PENDING |
-| 8 | Generate coder | ⏳ PENDING |
-| 9 | Generate reviewer | ⏳ PENDING |
-| 10 | Generate legacy-analyzer | ⏳ PENDING |
-| 11 | Generate refactorer | ⏳ PENDING |
+| 3 | Generate researcher skill | ⏳ PENDING |
+| 4 | Generate expert-listener skill | ⏳ PENDING |
+| 5 | Generate clarifier skill | ⏳ PENDING |
+| 6 | Generate architect skill | ⏳ PENDING |
+| 7 | Generate planner skill | ⏳ PENDING |
+| 8 | Generate coder skill | ⏳ PENDING |
+| 9 | Generate reviewer skill | ⏳ PENDING |
+| 10 | Generate legacy-analyzer skill | ⏳ PENDING |
+| 11 | Generate refactorer skill | ⏳ PENDING |
 
-### Agent Generation Workflow (Per Agent)
+### Agent Skill Generation Workflow (Per Skill)
 
-**Session 1:** Define Agent Role
+**Session 1:** Define Agent Skill
 - Define purpose
-- Define responsibilities
+- Define capabilities
 - Ask user approval
 
 **Session 2:** Map Knowledge
@@ -51,8 +51,9 @@
 - Create KNOWLEDGE-MAPPING entry
 - Ask user approval
 
-**Session 3:** Generate Agent
-- Create agent definition from template
+**Session 3:** Generate Agent Skill
+- Create SKILL.md with progressive disclosure structure
+- Add executable code if needed
 - Validate against Quality Gate Pattern
 - Ask user approval
 
@@ -109,7 +110,7 @@ Human → Orchestrator → AGENT → Orchestrator → REVIEWER → Orchestrator 
 ---
 ## Next Action
 
-- Generate researcher (Step 3 of Phase 3)
+- Generate researcher skill (Step 3 of Phase 3)
 
 ---
 
